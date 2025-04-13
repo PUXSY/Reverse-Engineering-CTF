@@ -46,7 +46,7 @@ int main() {
     // Initialize random seed
     srand(time(NULL) % 100);
     
-    printf("\n===== CTF Level 5 Challenge =====\n");
+    printf("===== CTF Level 5 Challenge =====\n");
     printf("This challenge requires deeper analysis.\n");
     printf("Enter the flag to proceed:\n> ");
     

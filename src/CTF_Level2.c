@@ -15,6 +15,7 @@ int CheckFlag(char *UserInput) {
 int main() {
   char UserInput[20];
 
+  printf("===== CTF Level 2 Challenge =====\n");
   printf("Enter the flag:\n");
   fgets(UserInput, sizeof(UserInput), stdin);
   

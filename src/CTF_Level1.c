@@ -7,6 +7,7 @@ int main() {
   char flag[17] = "CTF_1_{266152184}";
   char UserInput[20];
 
+  printf("===== CTF Level 1 Challenge =====\n");
   printf("Enter the flag:\n");
   fgets(UserInput, sizeof(UserInput), stdin);
   

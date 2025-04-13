@@ -44,6 +44,7 @@ char* Flag2P(char *flag) {
 int main() {
     char UserInput[64];
 
+    printf("===== CTF Level 3 Challenge =====\n");
     printf("Enter the flag:\n");
     fgets(UserInput, sizeof(UserInput), stdin);
     
