@@ -17,7 +17,7 @@ Analyze and dissect the provided binary to uncover hidden flags.
 3. Go to the `Executables` directory: `cd Executables`
 4. Run the main challenge binary: `./RunMe_CTF.exe`
 ```bash
-git clone <repository_url>
+git clone <https://github.com/PUXSY/Reverse-Engineering-CTF.git>
 cd Reverse-Engineering-CTF
 cd Executables
 ./RunMe_CTF.exe
