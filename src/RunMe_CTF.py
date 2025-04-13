@@ -15,14 +15,19 @@ def resource_path(relative_path: str) -> Path:
 
     return (base_path / relative_path).resolve()
 
-def Get_Flags_list(path_to_json: Path | str) -> dict[str, str]:
-    flags = {}
+def Get_Corect_Path(path_to_json: Path | str) -> Path:
     try:
         path = Path(path_to_json).resolve()
         print(f"Resolved path: {path}")
     except Path.exists(path_to_json):
         path = resource_path(path_to_json)
         print(f"Resolved path: {path}")
+        
+    return path
+
+def Get_Flags_list(path_to_json: Path | str) -> dict[str, str]:
+    flags = {}
+    path = Get_Corect_Path(path_to_json)
 
     if not path.exists():
         print("Path does not exist")
@@ -36,6 +41,7 @@ def Get_Flags_list(path_to_json: Path | str) -> dict[str, str]:
                 flags[level_name] = flag
 
     return flags
+
 
 # Load flags from JSON file
 flags = Get_Flags_list("../src/flags.json")

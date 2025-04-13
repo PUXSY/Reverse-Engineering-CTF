@@ -4,7 +4,7 @@
 #include <string.h>
 
 int CheckFlag(char *UserInput) {
-    char flag[16] = "CTF_2_{66753619}";
+    char flag[21] = "CTF_2_{672288856595}";
     if (strcmp(UserInput, flag) == 0) {
         return 1; // Correct
     } else {

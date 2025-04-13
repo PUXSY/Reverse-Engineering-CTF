@@ -37,7 +37,7 @@ char* FlagP(char *flag) {
 }
 
 char* Flag2P(char *flag) {
-    strcat(flag, "{27379982}");
+    strcat(flag, "{285468779723}");
     return flag;
 }
 

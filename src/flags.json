@@ -1,22 +1,28 @@
 {
     "flags": {
         "Level 1": {
-        "flag": "CTF_1_{43212898}"
+        "flag": "CTF_1_{43212898}",
+        "points": 10
         },
         "Level 2": {
-        "flag": "CTF_2_{66753619}"
+        "flag": "CTF_2_{66753619}",
+        "points": 15
         },
         "Level 3": {
-        "flag": "CTF_3_{27379982}"
+        "flag": "CTF_3_{27379982}",
+        "points": 15
         },
         "Level 4": {
-        "flag": "CTF_4_{18495364334}"
+        "flag": "CTF_4_{18495364334}",
+        "points": 20
         },
         "Level 5": {
-        "flag": "CTF_5_{53615844327}"
+        "flag": "CTF_5_{53615844327}",
+        "points": 50
         },
         "Level 6": {
-        "flag": "CTF_6_{126101126181015}"
+        "flag": "CTF_6_{126101126181015}",
+        "points": 100
         }
     }
 }
