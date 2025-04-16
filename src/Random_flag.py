@@ -23,11 +23,31 @@ def Generate_flag(level: int, start: int = 1, end: int = 9, end_rdd: int = 9) ->
     flag = base_flag + str(level) + base_flag2 + number + "}"
     return flag
 
+def septit(s: str, sBy: int) -> None:
+    if len(s) % sBy != 0:
+        print("Error: String length is not divisible by", sBy)
+        return
+
+    part_len = len(s) // sBy
+    for i in range(sBy):
+        part = s[i * part_len : (i + 1) * part_len]
+        print(f"number {i + 1}\n{part}")
+
+def ascii(word):
+    new_word = ""
+    max_len = 9
+    for c in word:
+        print(ord(c))
+        new_word += str(ord(c))
+
+    print("set_" + new_word[:max_len])
+
+
 def main() -> None:
-    level_start = 1
-    level_end = 12
-    added_by = 2
-    base_random = 9
+    level_start = 6
+    level_end = 6
+    added_by = 4
+    base_random = 24
     
     for flag_level in range(level_start, level_end + 1, 1):
         if (flag_level % 2) == 0:
@@ -35,4 +55,4 @@ def main() -> None:
         print(Generate_flag(flag_level, level_start, base_random, 9))
 
 if __name__ == "__main__":
-    main()
+    ascii("corrupted")

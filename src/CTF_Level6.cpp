@@ -2,12 +2,63 @@
 #include <string>
 #include <bitset>
 #include <iostream>
+#include <debugapi.h>
+
+std::string base64_key;
+std::string binary_key;
+
+int start_it(int argc, std::string* base64_key, std::string* binary_key);
 
 static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
 
+const char key[] = {
+0x54, 0x68, 0x65, 0x20, 0x72, 0x61, 0x62, 0x62, 0x69, 0x74,
+0x20, 0x68, 0x6f, 0x6c, 0x65, 0x20, 0x6e, 0x65, 0x76, 0x65,
+0x72, 0x20, 0x65, 0x6e, 0x64, 0x73, 0x2e, 0x00};
+
+volatile const char very_important_string_that_never_used_yeah_I_know_that_is_not_best_variable_name[] = { 0x1b, 0x31, 0x31, 0x31, 0x5e, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31,
+  0x5e, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x4d, 0x31, 0x31, 0x31, 0x31, 0x31, 
+  0x3e, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x31, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 
+  0x1b, 0x31, 0x31, 0x3c, 0x31, 0x31, 0x6d, 0x31, 0x31, 0x31, 0x6d, 0x31,
+  0x3c, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x5f, 0x7e, 0x65, 0x79, 
+  0x78, 0x7f, 0x76, 0x3d, 0x31, 0x73, 0x64, 0x65, 0x31, 0x65, 0x79, 0x74, 
+  0x31, 0x73, 0x74, 0x62, 0x65, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x31, 0x3c, 
+  0x3c, 0x3c, 0x3c, 0x3c, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x3e, 0x31, 0x31, 
+  0x31, 0x31, 0x31, 0x4d, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x3c, 0x3c, 0x3c, 
+  0x3c, 0x3c, 0x3c, 0x3c, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x6d, 0x31, 0x31, 
+  0x31, 0x31, 0x31, 0x6d, 0x1b, 0x0d };
+
+const char corrupted[] = { 0x5d, 0x7c, 0x6d, 0x7c, 0x7a, 0x6d, 0x7c, 0x7d, 0x39, 0x7a, 0x76, 0x6b,
+                           0x6b, 0x6c, 0x69, 0x6d, 0x7c, 0x7d, 0x39, 0x74, 0x7c, 0x74, 0x76, 0x6b, 
+                           0x60, 0x38
+};
+const char ok[] = { 0x2c, 0x6c, 0x06, 0x0c, 0x04, 0x05, 0x5a, 0x3d, 0x17, 0x17, 0x17, 0x68, 0x68, 
+  0x68, 0x68, 0x17, 0x17, 0x17, 0x68, 0x68, 0x17, 0x68, 0x68, 0x3d, 0x17, 0x17, 
+  0x18, 0x17, 0x68, 0x68, 0x17, 0x6b, 0x17, 0x18, 0x17, 0x18, 0x18, 0x68, 0x18, 
+  0x3d, 0x17, 0x18, 0x17, 0x18, 0x17, 0x18, 0x17, 0x18, 0x18, 0x17, 0x1b, 0x0b, 
+  0x17, 0x17, 0x17, 0x3d, 0x18, 0x17, 0x18, 0x68, 0x18, 0x17, 0x18, 0x18, 0x17, 
+  0x18, 0x4b, 0x17, 0x4b, 0x17, 0x17, 0x3d, 0x6b, 0x68, 0x68, 0x68, 0x68, 0x18, 
+  0x18, 0x68, 0x18, 0x17, 0x4b, 0x68, 0x4b, 0x17, 0x17, 0x3d, 0x2c, 0x6c, 0x07, 
+  0x5a, 0x3d 
+};
+const char ok_l[] = { 0x17, 0x17, 0x17, 0x17, 0x17, 0x70, 0x58, 0x58, 0x53, 0x17, 0x5d, 0x58, 0x55, 
+    0x16, 0x17, 0x3d 
+  };
+const char fail[] = { 0x31, 0x71, 0x1b, 0x11, 0x19, 0x1b, 0x47, 0x20, 0x0a, 0x0a, 0x0a, 0x0a, 0x75,
+    0x75, 0x75, 0x75, 0x75, 0x75, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
+    0x75, 0x0a, 0x0a, 0x75, 0x75, 0x0a, 0x20, 0x0a, 0x0a, 0x0a, 0x05, 0x0a, 0x75,
+    0x75, 0x75, 0x75, 0x05, 0x75, 0x75, 0x75, 0x75, 0x0a, 0x75, 0x0a, 0x02, 0x75,
+    0x03, 0x05, 0x0a, 0x05, 0x0a, 0x20, 0x0a, 0x0a, 0x05, 0x0a, 0x05, 0x75, 0x0a,
+    0x0a, 0x0a, 0x05, 0x0a, 0x75, 0x75, 0x0a, 0x4a, 0x05, 0x05, 0x0a, 0x05, 0x05,
+    0x0a, 0x05, 0x0a, 0x0a, 0x20, 0x0a, 0x05, 0x0a, 0x75, 0x75, 0x05, 0x0a, 0x0a,
+    0x05, 0x0a, 0x05, 0x75, 0x05, 0x0a, 0x05, 0x05, 0x0a, 0x05, 0x05, 0x0a, 0x05,
+    0x75, 0x75, 0x75, 0x20, 0x05, 0x75, 0x05, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x76,
+    0x75, 0x75, 0x06, 0x75, 0x05, 0x05, 0x75, 0x05, 0x05, 0x75, 0x75, 0x75, 0x75,
+    0x75, 0x05, 0x20, 0x31, 0x71, 0x1a, 0x47, 0x20
+};
 const int BIT_SIZE = 2048;
 
 static inline bool is_base64(unsigned char c) {
@@ -56,45 +107,30 @@ std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_
   return ret;
 
 }
-std::string base64_decode(std::string const& encoded_string) {
-  int in_len = encoded_string.size();
-  int i = 0;
-  int j = 0;
-  int in_ = 0;
-  unsigned char char_array_4[4], char_array_3[3];
-  std::string ret;
 
-  while (in_len-- && ( encoded_string[in_] != '=') && is_base64(encoded_string[in_])) {
-    char_array_4[i++] = encoded_string[in_]; in_++;
-    if (i ==4) {
-      for (i = 0; i <4; i++)
-        char_array_4[i] = base64_chars.find(char_array_4[i]);
-
-      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
-      for (i = 0; (i < 3); i++)
-        ret += char_array_3[i];
-      i = 0;
-    }
+std::string hash(std::string inp, std::string *oup, std::string key){
+  for (int i = 0; i < inp.length(); i++){
+    oup[i] = inp[i] ^ key[i % key.length()];
   }
+  return *oup;
+}
 
-  if (i) {
-    for (j = i; j <4; j++)
-      char_array_4[j] = 0;
+int start_it(int argc, std::string *base64_key, std::string *binary_key) {
+  const char *key = key;
+  int key_len = strlen(key);
 
-    for (j = 0; j <4; j++)
-      char_array_4[j] = base64_chars.find(char_array_4[j]);
 
-    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
-    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
-    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
-
-    for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
+  if (key_len > argc){
+    *base64_key = base64_encode((unsigned char*)key, key_len);
+    return 1;
+  }else if (key_len == argc)
+  {
+    std::string TextToBinaryString(std::string words);
+    *binary_key = TextToBinaryString(std::string(key));
+    return 1;
+  }else{
+    return 0;
   }
-
-  return ret;
 }
 
 std::string TextToBinaryString(std::string words) {
@@ -105,60 +141,99 @@ std::string TextToBinaryString(std::string words) {
     return binaryString;
 }
 
-std::string FlagA() {
-    std::string flag = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAA";
+std::string A() {
+    std::string a = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAX";
     
-    if (!flag.empty()) {
-        flag.pop_back();
+    if (!a.empty()) {
+        a.pop_back();
     }
-    return flag;
+    return a;
 }
 
-std::string FlagB(){
-    std::string flag = "wMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA";
-    if (!flag.empty()) {
-        flag.pop_back();
+std::string AA(){
+    std::string aa = "wMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDX";
+    if (!aa.empty()) {
+        aa.pop_back();
     }
-    return flag;
+    return aa;
 }
 
-std::string FlagC(){
-    std::string flag = "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMA";
-    if (!flag.empty()) {
-        flag.pop_back();
+std::string AAA(){
+    std::string aaa = "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMX";
+    if (!aaa.empty()) {
+        aaa.pop_back();
     }
-    return flag;
+    return aaa;
 }
 
-std::string FlagD(){
-    std::string flag = "DAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMTAwMDAxMTAxMDEwMTAwMDEwMDAxMTAwMTAxMTExMTAwMTEwMTEwMDEwMTExMTEwMTExMTAxMTAwMTEwMDAxMDAxMTAwMTAwMDExMDExMDAwMTEwMDAxMDAxMTAwMDAwMDExMDAwMTAwMTEwMDAxMDAxMTAwMTA==";
-    if (!flag.empty()) {
-        flag.pop_back();
+std::string AAAA(){
+    std::string aaaa = "DAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxMDAwMDExMDEwMTAxMDAwMTAwMDExMDAxMDExMTExMDAxMTAxMTAwMTAxMTExMTAxMTExMDExMDAxMTAwMTEwMDExMDExMTAwMTEwMTAwMDAxMTEwMDEwMDExMTAwMTAwMTExMDAxMDAxMTAxMDEwMDExMDExMDAwMTExMDAwMDAxMTAwMTAwMDExMDEwMTAwMTExMDAxMDAxMTAxMTAwMDExMDAxMTAwMTEwMTAxMDAxMTEwMDE==";
+    if (!aaaa.empty()) {
+        aaaa.pop_back();
     }
-    return flag;
+    return aaaa;
 }
+
+std::string B(){
+  std::string b = "MDEwMTAxMDAwMTAwMTAwMDAxMDAwMTAxMDAxMDAwMDAwMTAxMDAxMDAxMDAwMDAxMDEwMDAw";
+  if (!b.empty()) {
+    b.pop_back();
+  }
+  return b;
+}
+std::string BB(){
+  std::string bb = "MTAwMTAwMDAxMDAxMDAxMDAxMDEwMTAxMDAwMDEwMDAwMDAxMDAxMDAwMDEwMDExMTEwMTAw";
+  if (!bb.empty()) {
+    bb.pop_back();
+  }
+  return bb;
+}
+std::string BBB(){
+  std::string bbb = "MTEwMDAxMDAwMTAxMDAxMDAwMDAwMTAwMTExMDAxMDAwMTAxMDEwMTAxMTAwMTAwMDEwMTAx";
+  if (!bbb.empty()) {
+    bbb.pop_back();
+  }
+  return bbb;
+}
+
+std::string BBBB(){
+  std::string bbbb = "MDEwMDEwMDAxMDAwMDAwMTAwMDEwMTAxMDAxMTEwMDEwMDAxMDAwMTAxMDAxMTAwMTAwMDAx";
+  if (!bbbb.empty()) {
+    bbbb.pop_back();
+  }
+  return bbbb;
+}
+
 
 std::string GetFlag() {
-    std::string flag = "";
-    flag = FlagA() + FlagB() + FlagC() + FlagD();
-    return flag;
+  std::string Aflag = "0x7e1891b6028b08157a28";
+  std::string Bflag = "0x8f3a9c1d74b2e5f0";
+
+  Aflag = A() + AA() + AAA() + AAAA();
+  Bflag = B() + BB() + BBB() + BBBB();
+
+  if (Aflag.length() > Bflag.length()){
+    return Aflag;
+
+  }else{
+    return Bflag;
+  }
 }
 
-bool isValidFlag(const std::string& userInput) {
-    std::string userInputFlag = TextToBinaryString(userInput);
-
-    std::bitset<BIT_SIZE> bits(userInputFlag);
-    //Shift right by 64 bits
-    std::bitset<BIT_SIZE> shifted = bits >> 64;
-
-    //Convert shifted bits to string
-    std::string shiftedString = shifted.to_string();
-
-    std::string base64userInputFlag = base64_encode(reinterpret_cast<const unsigned char*>(shiftedString.c_str()), shiftedString.length());
-    if (base64userInputFlag == GetFlag()) {
-        return true;
-    }
-    return false;
+bool isValidFlag(const std::string& userInput, std::string &hash) {
+  std::string userInputFlag = TextToBinaryString(userInput);
+  std::bitset<BIT_SIZE> bits(userInputFlag);
+  std::bitset<BIT_SIZE> shifted = bits >> 0x40;
+  std::string shiftedString = shifted.to_string();
+  std::string base64userInputFlag = base64_encode(reinterpret_cast<const unsigned char*>(shiftedString.c_str()), shiftedString.length());
+  if (base64userInputFlag == GetFlag()) {
+      return true;
+  }else if (hash == GetFlag())
+  {
+    return true;
+  }
+  
+  return false;
 }
 
 int actualValidator(std::string input) {
@@ -189,82 +264,89 @@ int actualValidator(std::string input) {
 }
 
 int decoyValidator() {
-    // This function exists to confuse static analysis
-    return 0;
+    return 0x10;
 }
 
-int main(int argc, char *argv[]) {
-    srand(time(NULL) % 100);
-    std::string userInput;
+int _encode(){
+  return 0x80;
+}
 
+volatile char set_11812(){
+  return very_important_string_that_never_used_yeah_I_know_that_is_not_best_variable_name[rand() % 100];
+}
 
-    std::cout << "===== CTF Level 6 Challenge =====" << std::endl;
-    std::cout << "This challenge requires deeper analysis.\n" << std::endl;
-    std::cout << "Enter the flag to proceed:\n> ";
+char set_991111141(){
+  return corrupted[rand() % 100];
+}
 
+int main() {
+  srand(time(NULL) % 100);
+  std::string userInput;
+  char v12 = set_11812();
+  char v13 = set_991111141();
+  char v24 = v12 ^ v13;
+  std::string s_key;
 
-    std::getline(std::cin, userInput);
-    if (userInput.empty()) {
-        std::cout << "Invalid input. Please try again." << std::endl;
-        return 1;
-    }
+  // Anti-debugging: Check if the program is being run in a debugger
+  if (IsDebuggerPresent()) {
+      std::cout << "Debugger detected. Exiting..." << std::endl;
+      return 1;
+  }
 
-    // Anti-debugging: Check elapsed time to detect single-stepping
-    clock_t start = clock();
+  std::cout << "===== CTF Level 6 Challenge =====" << std::endl;
+  std::cout << "This challenge requires deeper analysis.\n" << std::endl;
+  std::cout << "Enter the flag to proceed:\n> ";
+  std::getline(std::cin, userInput);
 
-    // Looks like random selection but actually always picks the real validator
-    // This is to confuse static analysis
-    int selector = rand() % 4;
-    if (selector == 0 || selector == 2 || selector == 3) {
-        int validate = actualValidator(userInput);
-    } else {
-        int validate = decoyValidator();
-    }
+  if (userInput.empty()) {
+      std::cout << "Invalid input. Please try again." << std::endl;
+      return 1;
+  }
+  
+  // Anti-debugging: Check elapsed time to detect single-stepping
+  clock_t start = clock();
+  // Looks like random selection but actually always picks the real validator
+  // This is to confuse static analysis
+  int selector = rand() % 4;
+  if (selector == 0 || selector == 2 || selector == 3) {
+      int validate = actualValidator(userInput);
+  } else {
+      int validate = decoyValidator();
+  }
+  
+  clock_t end = clock();
     
-    clock_t end = clock();
-    
-    // If too much time has elapsed, it might be a debugger
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    if (time_spent > 0.1) {
-        printf("Processing error. Please try again.\n");
-        return 1;
-    }
+  // If too much time has elapsed, it might be a debugger
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+  if (time_spent > 0.1) {
+      printf("Processing error. Please try again.\n");
+      return 1;
+  }
+  if (start_it == 0){
+    _encode();
+  }else{
+    hash(base64_key, &s_key, key);
+  }
 
+  if (isValidFlag(userInput, s_key)) {
+      std::cout << "Correct!" << std::endl;
+  } else {
+      std::cout << "Wrong!" << std::endl;
+  }
+  std::getline(std::cin, userInput);
 
-    if (isValidFlag(userInput)) {
-        std::cout << "Correct!" << std::endl;
-    } else {
-        std::cout << "Wrong!" << std::endl;
-    }
-
-
-
-
-
-    return 0;
+  return 0;
 
 }   
 
 /*
-The flag is CTF_6_{126101126181015}
+The flag is CTF_6_{37499956825963595544168}
 
-Step 1: Convert the flag to binary string.
-0100001101010100010001100101111100110110010111110111101100110001001100100011011000110001001100000011000100110001001100100011011000110001001110000011000100110000001100010011010101111101
-
+Step 1: Convert the flag to binary string.  
 Step 1.5: Move the binary string 64 bits to the right.
-00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000110101010001000110010111110011011001011111011110110011000100110010001101100011000100110000001100010011000100110010
-
 Step 2: Convert the binary string to base64.
-MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMTAwMDAxMTAxMDEwMTAwMDEwMDAxMTAwMTAxMTExMTAwMTEwMTEwMDEwMTExMTEwMTExMTAxMTAwMTEwMDAxMDAxMTAwMTAwMDExMDExMDAwMTEwMDAxMDAxMTAwMDAwMDExMDAwMTAwMTEwMDAxMDAxMTAwMTA=
-
 Step 3: Brack the base64 string into 4 parts 683 characters each.
-p1: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA
-p2: wMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMD
-p3: AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM
-p4: DAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMTAwMDAxMTAxMDEwMTAwMDEwMDAxMTAwMTAxMTExMTAwMTEwMTEwMDEwMTExMTEwMTExMTAxMTAwMTEwMDAxMDAxMTAwMTAwMDExMDExMDAwMTEwMDAxMDAxMTAwMDAwMDExMDAwMTAwMTEwMDAxMDAxMTAwMTA=
-
 Step 4: Add a A to the end of the base64 string
-
 Step 5: Check if the base64 string is valid.
 If it is valid, then the flag is correct.
 */

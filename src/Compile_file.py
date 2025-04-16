@@ -3,13 +3,13 @@ import subprocess
 import os
 
 Current_path = Path(__file__).parent.resolve()
-
+error_list: list[str] = []
 
 def Get_file_name(path: str) -> list[str]:
     src_dir = Current_path / path.lstrip('/')
     return [str(f) for f in src_dir.iterdir() if f.is_file()]
 
-def Compile_file_gcc(files: list[str]) -> bool:
+def Compile_c_file(files: list[str]) -> bool:
     compilation_success = False
     
     for file in files:
@@ -22,18 +22,31 @@ def Compile_file_gcc(files: list[str]) -> bool:
             compilation_success = True
             print(f"Compiling {file_path.name}...")
             output_file = file_path.with_suffix('.exe')
-            subprocess.run(["gcc", str(file_path), "-o", str(output_file)], check=True)
-            print(f"The file {file_path.name} Location: {file_path}")
-            print(f"Compiled {file_path.name} successfully.")
             
-        except subprocess.CalledProcessError as e:
-            print(f"Error compiling {file_path.name}: {e}")
+            # Run compilation and capture output
+            result = subprocess.run(
+                ["gcc", "-s", str(file_path), "-o", str(output_file)],
+                check=False,  # Don't raise exception on error
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                # Capture detailed error information
+                error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
+                print(error_msg)
+                error_list.append(error_msg)
+            else:
+                print(f"The file {file_path.name} Location: {file_path}")
+                print(f"Compiled {file_path.name} successfully.")
+            
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            error_list.append(f"An unexpected error occurred: {e}")
     
     return compilation_success
 
-def Compile_file_gplasplas(files: list[str]) -> bool:
+def Compile_cpp_files(files: list[str]) -> bool:
     compilation_success = False
     
     for file in files:
@@ -46,18 +59,31 @@ def Compile_file_gplasplas(files: list[str]) -> bool:
             compilation_success = True
             print(f"Compiling {file_path.name}...")
             output_file = file_path.with_suffix('.exe')
-            subprocess.run(["g++", str(file_path), "-o", str(output_file)], check=True)
-            print(f"The file {file_path.name} Location: {file_path}")
-            print(f"Compiled {file_path.name} successfully.")
             
-        except subprocess.CalledProcessError as e:
-            print(f"Error compiling {file_path.name}: {e}")
+            # Run compilation and capture output
+            result = subprocess.run(
+                ["g++", "-s", str(file_path), "-o", str(output_file)],
+                check=False,  # Don't raise exception on error
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                # Capture detailed error information
+                error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
+                print(error_msg)
+                error_list.append(error_msg)
+            else:
+                print(f"The file {file_path.name} Location: {file_path}")
+                print(f"Compiled {file_path.name} successfully.")
+            
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            error_list.append(f"An unexpected error occurred: {e}")
     
     return compilation_success
 
-def Compile_file_cargo(files: list[str]) -> bool:
+def Compile_rust_files(files: list[str]) -> bool:
     compilation_success = False
     
     for file in files:
@@ -69,27 +95,54 @@ def Compile_file_cargo(files: list[str]) -> bool:
             
             compilation_success = True
             print(f"Compiling {file_path.name}...")
-            subprocess.run(["rustc", str(file_path), "--out-dir", str(Current_path)], check=True)
-            file_to_delete = file_path.with_suffix('.pdb')
-            subprocess.run(f'del "{file_to_delete}"', shell=True)
-            print(f"The file {file_path.name} Location: {file_path}")
-            print(f"Compiled {file_path.name} successfully.")
             
-        except subprocess.CalledProcessError as e:
-            print(f"Error compiling {file_path.name}: {e}")
+            # Run compilation and capture output
+            result = subprocess.run(
+                ["rustc", str(file_path), "--out-dir", str(Current_path)],
+                check=False,  # Don't raise exception on error
+                capture_output=True,
+                text=True
+            )
+            
+            if result.returncode != 0:
+                # Capture detailed error information
+                error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
+                print(error_msg)
+                error_list.append(error_msg)
+            else:
+                file_to_delete = file_path.with_suffix('.pdb')
+                if file_to_delete.exists():
+                    os.remove(file_to_delete)
+                print(f"The file {file_path.name} Location: {file_path}")
+                print(f"Compiled {file_path.name} successfully.")
+            
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
+            error_list.append(f"An unexpected error occurred: {e}")
     
     return compilation_success
 
-def Compile_file(files: list[str]) -> None:
+def Compile_file(files: list[str]) -> int:
+    success_count = 0
+    
     C_files: list[str] = [f for f in files if f.endswith('.c')]
     Cpp_files: list[str] = [f for f in files if f.endswith('.cpp')]
     Rust_files: list[str] = [f for f in files if f.endswith('.rs')]
     
-    C_files_compiled = Compile_file_gcc(C_files)
-    Cpp_files_compiled = Compile_file_gplasplas(Cpp_files)
-    Rust_files_compiled = Compile_file_cargo(Rust_files)
+    # Track successful compilations by counting newly created .exe files before and after
+    exe_files_before = len([f for f in files if f.endswith('.exe')])
+    
+    C_files_compiled = Compile_c_file(C_files)
+    Cpp_files_compiled = Compile_cpp_files(Cpp_files)
+    Rust_files_compiled = Compile_rust_files(Rust_files)
+    
+    # Get newly created .exe files
+    new_files = Get_file_name("./")
+    exe_files_after = len([f for f in new_files if f.endswith('.exe')])
+    
+    success_count = exe_files_after - exe_files_before
+    
+    print("\n ===----=== ===---=== ===----=== \n")
     
     if C_files_compiled:
         print(f"Compiled {len(C_files)} C files.")
@@ -97,18 +150,27 @@ def Compile_file(files: list[str]) -> None:
         print(f"Compiled {len(Cpp_files)} C++ files.")
     if Rust_files_compiled:
         print(f"Compiled {len(Rust_files)} Rust files.")
-    else:
-        print(f"The Compiling was not successful.\nC File : {C_files_compiled}\nC++ File: {Cpp_files_compiled}\nRust File: {Rust_files_compiled}")
+
+    print(f"\nSuccess number is {success_count}")
+
+    return success_count
     
 def Move_file_to_dir(files: list[str], target_dir: str) -> bool:
     move_success = False
+    moved_files_count = 0
     target_path = Current_path / target_dir
     
-    for file in files:
+    # Create target directory if it doesn't exist
+    if not target_path.exists():
+        target_path.mkdir(parents=True, exist_ok=True)
+    
+    exe_files = [f for f in files if f.endswith('.exe')]
+    
+    for file in exe_files:
         try:
             file_path = Path(file)
             
-            if file_path.is_dir() or file_path.suffix != '.exe':
+            if file_path.is_dir():
                 continue
             
             target_file = target_path / file_path.name
@@ -117,39 +179,84 @@ def Move_file_to_dir(files: list[str], target_dir: str) -> bool:
             try:
                 import shutil
                 shutil.copy2(file_path, target_file)
+                moved_files_count += 1
+                
+                # Remove source file after successful copy
+                if file_path.exists():
+                    os.remove(file_path)
+                
+                if target_file.exists():
+                    print(f"Successfully moved {file_path.name} to {target_dir}")
+                    move_success = True
+                else:
+                    print(f"Failed to move {file_path.name}")
+                    error_list.append(f"Failed to move {file_path.name}")
+                
             except FileNotFoundError:
-                print(f"Target directory {target_dir} does not exist.")
-                continue
+                error_msg = f"Target directory {target_dir} does not exist."
+                print(error_msg)
+                error_list.append(error_msg)
             except shutil.Error as e:
-                print(f"Error moving {file_path.name}: {e}")
-                continue
-            finally:
-                os.remove(file_path) 
-            
-            if target_file.exists():
-                print(f"Successfully moved {file_path.name} to {target_dir}")
-                move_success = True
-            else:
-                print(f"Failed to move {file_path.name}")
+                error_msg = f"Error moving {file_path.name}: {e}"
+                print(error_msg)
+                error_list.append(error_msg)
             
         except Exception as e:
-            print(f"Error moving {file_path.name}: {e}")
+            error_msg = f"Error moving {file_path.name}: {e}"
+            print(error_msg)
+            error_list.append(error_msg)
     
-    return move_success
+    return move_success and moved_files_count > 0
 
-  
+def Print_Summary(success_count: int, moved_files_count: int, move_success: bool) -> None:
+    # ANSI color codes
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+    
+    print(f"\n{BOLD}{BLUE}===== COMPILATION SUMMARY ====={RESET}")
+    print(f"{BOLD}Successfully compiled:{RESET} {GREEN}{success_count} files{RESET}")
+    
+    if error_list:
+        print(f"{BOLD}Failed to compile:{RESET} {RED}{len(error_list)} files{RESET}")
+        print(f"\n{BOLD}{RED}==== COMPILATION ERRORS ===={RESET}")
+        for i, error in enumerate(error_list):
+            print(f"{RED}Error {i + 1}:{RESET}\n{error}")
+    
+    print(f"\n{BOLD}{BLUE}===== FILE MOVEMENT SUMMARY ====={RESET}")
+    if move_success:
+        print(f"{GREEN}Successfully moved {moved_files_count} executable files{RESET}")
+    else:
+        print(f"{RED}Failed to move executable files{RESET}")
+    
+    print(f"\n{BOLD}{BLUE}===== PROCESS COMPLETE ====={RESET}")
+
 def main() -> None:
+    # Clear any existing errors from previous runs
+    error_list.clear()
+    
+    # Get all files in current directory
     files = Get_file_name("./")
     new_move_dir = "../Executables"
     
-    Compile_file(files)
+    # Compile files and get success count
+    success_count = Compile_file(files)
+    
+    # Get all executable files
     new_files = Get_file_name("./")
-    move_success = Move_file_to_dir(new_files, new_move_dir)
-    if move_success:
-        print(f"Moved {len(new_files)} files to {new_move_dir}.")
-    else:
-        print(f"Failed to move files to {new_move_dir}.")
-        
+    exe_files = [f for f in new_files if f.endswith('.exe')]
+    
+    # Move files
+    move_success = Move_file_to_dir(exe_files, new_move_dir)
+    
+    # Count moved files
+    moved_files_count = len(exe_files)
+    
+    # Print summary
+    Print_Summary(success_count, moved_files_count, move_success)
         
 if __name__ == "__main__":
     main()
