@@ -1,4 +1,8 @@
 import random
+import hashlib
+from pathlib import Path
+import json
+import sys
 
 def Generate_flag(level: int, start: int = 1, end: int = 9, end_rdd: int = 9) -> str:
     """
@@ -42,10 +46,9 @@ def ascii(word):
 
     print("set_" + new_word[:max_len])
 
-
 def main() -> None:
     level_start = 6
-    level_end = 6
+    level_end = 7
     added_by = 4
     base_random = 24
     
@@ -54,5 +57,54 @@ def main() -> None:
             base_random += added_by
         print(Generate_flag(flag_level, level_start, base_random, 9))
 
-if __name__ == "__main__":
-    ascii("corrupted")
+
+
+def resource_path(relative_path: str) -> Path:
+    try:
+        base_path = Path(sys._MEIPASS)
+    except AttributeError:
+        base_path = Path(__file__).parent.resolve()
+    return (base_path / relative_path).resolve()
+
+def Get_Corect_Path(path_to_json: Path | str) -> Path:
+    try:
+        path = Path(path_to_json).resolve()
+    except Path.exists(path_to_json):
+        path = resource_path(path_to_json)
+    return path
+
+
+def Get_Flags_list(path_to_json: Path | str) -> tuple[dict[str, str], dict[str, int]]:
+    flags = {}
+    path = Get_Corect_Path(path_to_json)
+
+    if not path.exists():
+        print("Path does not exist")
+        path = resource_path("./flags.json")
+        print("Using default path:", path)
+    if not path.exists():
+        print("Default path does not exist")
+        print("Using empty flags list")
+        return flags
+
+    with open(path, "r") as file:
+        data = json.load(file)
+        for level_name, level_data in data.get("flags", {}).items():
+            flag = level_data.get("flag")
+            point = level_data.get("points", 0)
+            if flag:
+                flags[level_name] = hashlib.sha512(flag.encode()).hexdigest()
+
+    return flags
+
+def flags_sha512(path_to_json: Path | str) -> None:
+    try:
+        path = Path(path_to_json).resolve()
+    except Path.exists(path_to_json):
+        path = resource_path(path_to_json)
+    return path
+
+
+if __name__ == "__main__": 
+    flags =  Get_Flags_list("../src/flags.json")
+    print(flags)

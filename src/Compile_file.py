@@ -23,16 +23,14 @@ def Compile_c_file(files: list[str]) -> bool:
             print(f"Compiling {file_path.name}...")
             output_file = file_path.with_suffix('.exe')
             
-            # Run compilation and capture output
             result = subprocess.run(
                 ["gcc", "-s", str(file_path), "-o", str(output_file)],
-                check=False,  # Don't raise exception on error
+                check=False,  
                 capture_output=True,
                 text=True
             )
             
             if result.returncode != 0:
-                # Capture detailed error information
                 error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
                 print(error_msg)
                 error_list.append(error_msg)
@@ -60,16 +58,14 @@ def Compile_cpp_files(files: list[str]) -> bool:
             print(f"Compiling {file_path.name}...")
             output_file = file_path.with_suffix('.exe')
             
-            # Run compilation and capture output
             result = subprocess.run(
                 ["g++", "-s", str(file_path), "-o", str(output_file)],
-                check=False,  # Don't raise exception on error
+                check=False, 
                 capture_output=True,
                 text=True
             )
             
             if result.returncode != 0:
-                # Capture detailed error information
                 error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
                 print(error_msg)
                 error_list.append(error_msg)
@@ -96,16 +92,14 @@ def Compile_rust_files(files: list[str]) -> bool:
             compilation_success = True
             print(f"Compiling {file_path.name}...")
             
-            # Run compilation and capture output
             result = subprocess.run(
                 ["rustc", str(file_path), "--out-dir", str(Current_path)],
-                check=False,  # Don't raise exception on error
+                check=False, 
                 capture_output=True,
                 text=True
             )
             
             if result.returncode != 0:
-                # Capture detailed error information
                 error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
                 print(error_msg)
                 error_list.append(error_msg)
@@ -129,14 +123,12 @@ def Compile_file(files: list[str]) -> int:
     Cpp_files: list[str] = [f for f in files if f.endswith('.cpp')]
     Rust_files: list[str] = [f for f in files if f.endswith('.rs')]
     
-    # Track successful compilations by counting newly created .exe files before and after
     exe_files_before = len([f for f in files if f.endswith('.exe')])
     
     C_files_compiled = Compile_c_file(C_files)
     Cpp_files_compiled = Compile_cpp_files(Cpp_files)
     Rust_files_compiled = Compile_rust_files(Rust_files)
     
-    # Get newly created .exe files
     new_files = Get_file_name("./")
     exe_files_after = len([f for f in new_files if f.endswith('.exe')])
     
@@ -160,7 +152,6 @@ def Move_file_to_dir(files: list[str], target_dir: str) -> bool:
     moved_files_count = 0
     target_path = Current_path / target_dir
     
-    # Create target directory if it doesn't exist
     if not target_path.exists():
         target_path.mkdir(parents=True, exist_ok=True)
     
@@ -181,7 +172,6 @@ def Move_file_to_dir(files: list[str], target_dir: str) -> bool:
                 shutil.copy2(file_path, target_file)
                 moved_files_count += 1
                 
-                # Remove source file after successful copy
                 if file_path.exists():
                     os.remove(file_path)
                 
@@ -209,10 +199,8 @@ def Move_file_to_dir(files: list[str], target_dir: str) -> bool:
     return move_success and moved_files_count > 0
 
 def Print_Summary(success_count: int, moved_files_count: int, move_success: bool) -> None:
-    # ANSI color codes
     GREEN = "\033[92m"
     RED = "\033[91m"
-    YELLOW = "\033[93m"
     BLUE = "\033[94m"
     BOLD = "\033[1m"
     RESET = "\033[0m"
@@ -235,27 +223,15 @@ def Print_Summary(success_count: int, moved_files_count: int, move_success: bool
     print(f"\n{BOLD}{BLUE}===== PROCESS COMPLETE ====={RESET}")
 
 def main() -> None:
-    # Clear any existing errors from previous runs
     error_list.clear()
-    
-    # Get all files in current directory
     files = Get_file_name("./")
     new_move_dir = "../Executables"
-    
-    # Compile files and get success count
     success_count = Compile_file(files)
-    
-    # Get all executable files
     new_files = Get_file_name("./")
     exe_files = [f for f in new_files if f.endswith('.exe')]
-    
-    # Move files
     move_success = Move_file_to_dir(exe_files, new_move_dir)
-    
-    # Count moved files
     moved_files_count = len(exe_files)
     
-    # Print summary
     Print_Summary(success_count, moved_files_count, move_success)
         
 if __name__ == "__main__":

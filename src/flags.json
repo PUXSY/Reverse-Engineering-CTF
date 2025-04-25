@@ -1,28 +1,39 @@
 {
     "flags": {
         "Level 1": {
-        "flag": "CTF_1_{266152184}",
-        "points": 10
+            "flag": "4d02b05ffdbe038485ed08821eba666fa14f1b24327b0e40f1d395794f425d33e7282689b2a99d056616e927aafd61c83074183934bfc8a72fc3898dfaf1b9ea", 
+            "points": 10,
+            "note": "CTF_1_{266152184}"
         },
         "Level 2": {
-        "flag": "CTF_2_{672288856595}",
-        "points": 15
+            "flag": "da8f528033c942c44c55b89226c77201ddb02756d90fbd30f58f0668e50b407f4b79c97b18c985596aff981a55555e7e6b1aaa9ca1e706a820654a577c59c218",
+            "points": 15,
+            "note": "CTF_2_{672288856595}"
         },
         "Level 3": {
-        "flag": "CTF_3_{27379982}",
-        "points": 15
+            "flag": "6d1b014396abf80dddf1cd7b99fe0a15fd36286b7374b5c6f67f7ce874381a0f61b617e06b1f8c1e1c2e53a871b6a229222e29a8805fe6afa9e45fd94da60d67",
+            "points": 15,
+            "note": "CTF_3_{27379982}"
         },
         "Level 4": {
-        "flag": "CTF_4_{18495364334}",
-        "points": 20
+            "flag": "f89de848f34fa90edcb73e6121649b21f669bdb2dfc42b541263311de9fb64b8d65f0a6c7294c1ec0d42d8513a6eaf1cdf5564a63af3a488747ee47e3cb6aa53",
+            "points": 20,
+            "note": "CTF_4_{18495364334}"
         },
         "Level 5": {
-        "flag": "CTF_5_{53615844327}",
-        "points": 50
+            "flag": "73f256aa0a11cc25123b2223e54145966bdceb9941a9a76b0d8d725cdb8f90fff16a44db7c42ecfe80110a1826aafa40e8f62663323a6f4f67def0d4f8a4cd8c",
+            "points": 50,
+            "note": "CTF_5_{53615844327}"
         },
         "Level 6": {
-        "flag": "CTF_6_{37499956825963595544168}",
-        "points": 100
+            "flag": "f5fce2f680488c66fb64f125f091038ea128cc6a7aa73e6e0a717666707a75581bb11ba9febad71cce54e3b47ce8c48a8884b9a807ce82a976902884beb108a9",
+            "points": 90,
+            "note": "CTF_6_{37499956825963595544168}"
+        },
+        "Level 7": {
+            "flag": "8ff1c95e6da686c8c8423ab314bea13b454aa6113440c095792f214ce666696aa6d5f8b28f282d774e43f41e04c358c72c853cae891115e9bc57ff855c97722a",
+            "points": 100,
+            "note": "CTF_7_{27296757234477971348818}"
         }
     }
 }
