@@ -28,3 +28,9 @@ int main() {
   printf("Please try again.\n");
   return 0;
 }
+
+/*
+The flag is CTF_1_{266152184}
+the flag is stored in the main function.
+os go to the main and see the flag.
+*/

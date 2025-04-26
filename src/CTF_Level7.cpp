@@ -93,6 +93,8 @@ std::string locl_decrypt(const std::vector<std::string>& inp) {
         temp_values.push_back(hex_val ^ i);
     }
     
+    free(temp_values.data());
+
     int sum = std::accumulate(temp_values.begin(), temp_values.end(), 0);
     int magic = sum / (2 * inp.size());
     

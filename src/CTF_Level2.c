@@ -36,3 +36,9 @@ int main() {
   printf("Please try again.\n");
   return 0;
 }
+
+/*
+The flag is CTF_2_{672288856595}
+the flag is stored in the CheckFlag function.
+os go to main and see the CheckFlag function go to it and see the flag.
+*/
