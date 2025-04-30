@@ -91,9 +91,9 @@ def Get_Flags_list(path_to_json: Path | str) -> tuple[dict[str, str], dict[str, 
         data = json.load(file)
         for level_name, level_data in data.get("flags", {}).items():
             flag = level_data.get("flag")
-            point = level_data.get("points", 0)
             if flag:
                 flags[level_name] = hashlib.sha512(flag.encode()).hexdigest()
+                
 
     return flags
 
