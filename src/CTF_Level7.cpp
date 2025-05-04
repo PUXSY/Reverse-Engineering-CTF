@@ -7,7 +7,7 @@
 #include <cstring>
 
 #define MAX_INPUT_LEN 255
-#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:StartUp");
+#pragma comment(linker, "/SUBSYSTEM:console /ENTRY:StartUp");
 
 
 const std::vector<std::string> encrypted_flag = {"0x7b", "0x7a", "0x7b", "0x7d", "0xa3", "0xac", "0xa1", "0x79", "0x7f", "0xa0", "0x76", "0x72", "0xa0", "0x72", "0xa6", "0x74"};
@@ -119,10 +119,6 @@ class cli {
     public:
         std::string input;
     
-        cli(std::string input) {
-            this->input = input;
-        }
-    
         void print() {
             std::cout << "===== CTF Level 7 Challenge =====" << std::endl;
             std::cout << "This challenge requires deeper analysis.\n" << std::endl;
@@ -133,17 +129,14 @@ class cli {
             this->input = input;
         }
         
-        int ui() {
+        void ui() {
             if (this->input == flag1) {
                 this->hint();
-                return 0;
             }
     
             if (this->input == flag2) {
                 this->kaki();
-                return 0;
             }
-            return 0;
         }
     
     private:
@@ -157,13 +150,12 @@ class cli {
         void kaki() {
             std::cout << "Did you really think it was that easy?" << std::endl;
         }
-    }; 
+}; 
 
 int main() {
     anti_debug_check();
-
     char userInput[MAX_INPUT_LEN];
-    cli cli_obj = cli(userInput);
+    cli cli_obj = cli();
     char flag[5] = "0x6E";
     std::string v12 = "0x68696E74";
     std::string v13 = "0x7b";
@@ -173,14 +165,13 @@ int main() {
     cli_obj.print();
     std::cin.getline(userInput, MAX_INPUT_LEN);
 
+    cli_obj.get_input(userInput);
+    cli_obj.ui();
+    
     v12 = magic_num_hash(userInput, strlen(userInput));
     v13 = locl_decrypt(encrypted_flag);
     v15 = v15 + v14 + flag + "74";
     strcpy(v14, "kaki");
-    
-
-    cli_obj.get_input(userInput);
-    cli_obj.ui();
 
     if (v14 != v15){
         if (v12 == v13){
@@ -191,6 +182,6 @@ int main() {
     }else{
         std::cout << "Wrong!" << std::endl;
     }
-
+    
     return 0;
 }

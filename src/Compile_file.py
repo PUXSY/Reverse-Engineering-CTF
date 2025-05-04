@@ -61,7 +61,7 @@ def Compile_cpp_files(files: list[str]) -> bool:
             result = subprocess.run(
                 ["g++", "-s", str(file_path), "-o", str(output_file)],
                 check=False, 
-                capture_output=True,
+                capture_output=True,    
                 text=True
             )
             
