@@ -92,8 +92,6 @@ std::string locl_decrypt(const std::vector<std::string>& inp) {
         int hex_val = std::stoi(hex_str, nullptr, 16);
         temp_values.push_back(hex_val ^ i);
     }
-    
-    free(temp_values.data());
 
     int sum = std::accumulate(temp_values.begin(), temp_values.end(), 0);
     int magic = sum / (2 * inp.size());
@@ -154,6 +152,7 @@ class cli {
 
 int main() {
     anti_debug_check();
+
     char userInput[MAX_INPUT_LEN];
     cli cli_obj = cli();
     char flag[5] = "0x6E";
@@ -165,15 +164,19 @@ int main() {
     cli_obj.print();
     std::cin.getline(userInput, MAX_INPUT_LEN);
 
+
     cli_obj.get_input(userInput);
     cli_obj.ui();
-    
+
+
     v12 = magic_num_hash(userInput, strlen(userInput));
     v13 = locl_decrypt(encrypted_flag);
     v15 = v15 + v14 + flag + "74";
     strcpy(v14, "kaki");
 
-    if (v14 != v15){
+
+    if (std::string(v14) != v15) {
+
         if (v12 == v13){
             std::cout << "Correct!" << std::endl;
         }else{

@@ -6,15 +6,13 @@
 
 const char *binaryFlag = "01000011 01010100 01000110 01011111 00110100 01011111 01111011 00110001 00111000 00110100 00111001 00110101 00110011 00110110 00110100 00110011 00110011 00110100";
 
-// Function to convert a decimal number to binary string representation
 void decimalToBinary(int decimal, char *binary) {
-    // Initialize binary string with 8 '0's and null terminator
     for (int i = 0; i < 8; i++) {
         binary[i] = '0';
     }
     binary[8] = '\0';
     
-    // Convert decimal to binary
+
     int i = 7;
     while (decimal > 0 && i >= 0) {
         binary[i--] = (decimal % 2) + '0';
@@ -23,7 +21,7 @@ void decimalToBinary(int decimal, char *binary) {
 }
 
 void textToBinary(char *text, char *binary) {
-    char *octet = malloc(9); // 8 bits + null terminator
+    char *octet = malloc(9);
     if(octet == NULL)
         exit(1);
     
@@ -32,7 +30,6 @@ void textToBinary(char *text, char *binary) {
     while(*text && binary_pos < binaryLength - 9) {
         decimalToBinary(*text, octet);
         
-        // Copy the binary octet to the output
         for(int i = 0; i < 8; i++) {
             binary[binary_pos++] = octet[i];
         }
@@ -44,7 +41,6 @@ void textToBinary(char *text, char *binary) {
     free(octet);
 }
 
-// Function to XOR two binary strings and return the result as an integer
 int validateFlag(char *userInput) {
     int binaryLength = (strlen(userInput) * 9); 
     char *userInputBinary = malloc(binaryLength + 1);
