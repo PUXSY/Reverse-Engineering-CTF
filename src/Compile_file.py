@@ -5,9 +5,21 @@ import os
 Current_path = Path(__file__).parent.resolve()
 error_list: list[str] = []
 
-def Get_file_name(path: str) -> list[str]:
+def Get_all_files_name(path: str | Path) -> list[str]:
+    dir = Current_path / path.lstrip('/')
+    return [str(f) for f in dir.iterdir() if f.is_file()]
+
+def Get_files_name_to_compile(path: str | Path) -> list[str]:
     src_dir = Current_path / path.lstrip('/')
-    return [str(f) for f in src_dir.iterdir() if f.is_file()]
+    result = subprocess.run(
+        ["git", "ls-files", "--modified"],
+        capture_output=True,
+        text=True,
+        cwd=src_dir
+    )
+    files = result.stdout.strip().split('\n')
+    return [f for f in files if f]
+
 
 def Compile_c_file(files: list[str]) -> bool:
     compilation_success = False
@@ -129,7 +141,7 @@ def Compile_file(files: list[str]) -> int:
     Cpp_files_compiled = Compile_cpp_files(Cpp_files)
     Rust_files_compiled = Compile_rust_files(Rust_files)
     
-    new_files = Get_file_name("./")
+    new_files = Get_all_files_name("./")
     exe_files_after = len([f for f in new_files if f.endswith('.exe')])
     
     success_count = exe_files_after - exe_files_before
@@ -224,11 +236,14 @@ def Print_Summary(success_count: int, moved_files_count: int, move_success: bool
 
 def main() -> None:
     error_list.clear()
-    files = Get_file_name("./")
+    files = Get_files_name_to_compile("./")
     new_move_dir = "../Executables"
     success_count = Compile_file(files)
-    new_files = Get_file_name("./")
+    new_files = Get_all_files_name("./")
     exe_files = [f for f in new_files if f.endswith('.exe')]
+    
+    print("EXE files found:", exe_files)
+    
     move_success = Move_file_to_dir(exe_files, new_move_dir)
     moved_files_count = len(exe_files)
     

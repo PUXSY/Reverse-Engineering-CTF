@@ -150,6 +150,7 @@ class cli {
         }
 }; 
 
+
 int main() {
     anti_debug_check();
 

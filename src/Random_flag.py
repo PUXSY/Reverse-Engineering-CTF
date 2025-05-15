@@ -47,10 +47,10 @@ def ascii(word):
     print("set_" + new_word[:max_len])
 
 def main() -> None:
-    level_start = 6
-    level_end = 7
-    added_by = 4
-    base_random = 24
+    level_start = 8
+    level_end = 8
+    added_by = 8
+    base_random = 28
     
     for flag_level in range(level_start, level_end + 1, 1):
         if (flag_level % 2) == 0:
@@ -106,5 +106,4 @@ def flags_sha512(path_to_json: Path | str) -> None:
 
 
 if __name__ == "__main__": 
-    flags =  Get_Flags_list("../src/flags.json")
-    print(flags)
+    main()

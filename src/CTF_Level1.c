@@ -10,7 +10,7 @@ int main() {
   printf("===== CTF Level 1 Challenge =====\n");
   printf("Enter the flag:\n");
   fgets(UserInput, sizeof(UserInput), stdin);
-  
+
   size_t len = strlen(UserInput);
   if (len > 0 && UserInput[len - 1] == '\n') {
       UserInput[len - 1] = '\0';
