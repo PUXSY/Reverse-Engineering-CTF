@@ -1,6 +1,6 @@
 # Reverse Engineering CTF Challenge 🛠️
 
-## Overview
+### Overview
 Welcome to the Reverse Engineering Capture The Flag (CTF) challenge!  
 This challenge is designed to test and improve your reverse engineering skills.  
 Analyze and dissect the provided binary to uncover hidden flags.
@@ -8,37 +8,37 @@ Analyze and dissect the provided binary to uncover hidden flags.
 ## Levels 📜
 the levels difficulty
 
-|level     |difficulty     |
-|:----------:|:-------------:|
-| 1 |  easy  |
-| 2 |  easy  |
-| 3 |  easy  |
-| 4 |  easy  |
-| 5 | medium |
-| 6 | medium |
-| 7 | medium |
-| 8 |  hard  |
-| 9 |  hard  |
+|level     |difficulty     | 
+|:----------:|:-------------:| 
+| 1 |  **easy**|
+| 2 |  **easy**|
+| 3 |  **easy**|
+| 4 |  **easy**|
+| 5 | **medium**|
+| 6 | **medium**|
+| 7 | **medium**|
+| 8 | **hard** (It's not working and but to fix it.)|
+| 9 | **hard**|
 
 
 
 ## How to Play 🎓
-1. Navigate to the `/Executables` directory — it contains all the executable CTF files.
-2. Run the main binary `./RunMe_CTF.exe`
-3. Enter the flags as prompted. Each level corresponds to a unique reverse engineering task.
-4. Use your reverse engineering tools and skills to solve each level.
-
-## Installation
-1. Clone this repository: `git clone <repository_url>`
-2. Navigate into the project folder: `cd Reverse-Engineering-CTF`
-3. Go to the `Executables` directory: `cd Executables`
-4. Run the main challenge binary: `./RunMe_CTF.exe`
-```bash
-git clone <https://github.com/PUXSY/Reverse-Engineering-CTF.git>
-cd Reverse-Engineering-CTF
-cd Executables
-./RunMe_CTF.exe
+#### 1. Clone the repository
 ```
+git clone https://github.com/PUXSY/Reverse-Engineering-CTF.git
+```
+#### 2.  Navigate to the project directory
+```
+cd Reverse-Engineering-CTF/Executables
+```
+#### 3.  Choose a challenge to start with
+Run the RunMe_CTF.exe
+```
+RunMe_CTF.exe
+```
+And start a level when you find the flag go to RunMe_CTF.exe and chack if you are corect.
+#### 4.  Use your favorite RE tools
+Find all the flags!!!
 
 > 💡 **Note:** On Windows, just double-click `RunMe_CTF.exe`. On Linux, ensure it has execute permissions (`chmod +x RunMe_CTF.exe`).
 
@@ -56,6 +56,6 @@ cd Executables
 - If you're stuck, check the `/src` folder. It contains the source code and helpful explanations.
 - Flag format:  `CTF_level_{...}`
 
-
+virson 1.1
 ## Author ❤️
 Created by: [@PUXSY](https://github.com/PUXSY)
