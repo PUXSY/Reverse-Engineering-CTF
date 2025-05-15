@@ -5,6 +5,23 @@ Welcome to the Reverse Engineering Capture The Flag (CTF) challenge!
 This challenge is designed to test and improve your reverse engineering skills.  
 Analyze and dissect the provided binary to uncover hidden flags.
 
+## Levels 📜
+the levels difficulty
+
+|level     |difficulty     |
+|:----------:|:-------------:|
+| 1 |  easy  |
+| 2 |  easy  |
+| 3 |  easy  |
+| 4 |  easy  |
+| 5 | medium |
+| 6 | medium |
+| 7 | medium |
+| 8 |  hard  |
+| 9 |  hard  |
+
+
+
 ## How to Play 🎓
 1. Navigate to the `/Executables` directory — it contains all the executable CTF files.
 2. Run the main binary `./RunMe_CTF.exe`

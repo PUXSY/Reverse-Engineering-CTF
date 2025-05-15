@@ -1,92 +1,97 @@
-// CTF_Level5 (Fixed Overflow)
+// CTF_Level4
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
-const unsigned long long correct_hash = 12763515080480605377;
+const char *binaryFlag = "01000011 01010100 01000110 01011111 00110101 01011111 01111011 00110010 00110110 00110011 00110011 00110101 00110101 00110111 00111000 00111001 00110010 00110110 00110100 00111001 00110111 00110001 00110110 00110100 01111101";
 
-// Custom hashing function
-unsigned long long hash(char *str) {
-    unsigned long long hash = 5381;
-    int c;
+void decimalToBinary(int decimal, char *binary) {
+    for (int i = 0; i < 8; i++) {
+        binary[i] = '0';
+    }
+    binary[8] = '\0';
     
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c;
+
+    int i = 7;
+    while (decimal > 0 && i >= 0) {
+        binary[i--] = (decimal % 2) + '0';
+        decimal /= 2;
+    }
+}
+
+void textToBinary(char *text, char *binary) {
+    char *octet = malloc(9);
+    if(octet == NULL)
+        exit(1);
     
-    return hash;
+    int binary_pos = 0;
+    int binaryLength = (strlen(text) * 9); 
+    while(*text && binary_pos < binaryLength - 9) {
+        decimalToBinary(*text, octet);
+        
+        for(int i = 0; i < 8; i++) {
+            binary[binary_pos++] = octet[i];
+        }
+        binary[binary_pos++] = ' ';
+        ++text;
+    }
+    
+    binary[binary_pos] = '\0';
+    free(octet);
 }
 
-// Function pointer type for validation
-typedef int (*validator_func)(char*);
+int validateFlag(char *userInput) {
+    int binaryLength = (strlen(userInput) * 9); 
+    char *userInputBinary = malloc(binaryLength + 1);
+    
+    if(userInputBinary == NULL)
+        exit(1);
 
-int actualValidator(char *input) {
-    const unsigned long long correct_hash = 11763518080480605357;
-    return hash(input) == correct_hash;
-}
-
-
-int decoyValidator(char *input) {
-    return 0;
-}
-void printHash(char *str) {
-    printf("Hash of \"%s\" is: %llu\n", str, hash(str));
+    textToBinary(userInput, userInputBinary);
+    
+    int xorResult = 0;
+    int i = 0, j = 0;
+    
+    while(binaryFlag[i] != '\0' && userInputBinary[j] != '\0') {
+        if(binaryFlag[i] == ' ') {
+            i++;
+            continue;
+        }
+        if(userInputBinary[j] == ' ') {
+            j++;
+            continue;
+        }
+        
+        int digit1 = binaryFlag[i] - '0';
+        int digit2 = userInputBinary[j] - '0';
+        xorResult += (digit1 ^ digit2);
+        
+        i++;
+        j++;
+    }
+    free(userInputBinary);
+    return xorResult;
 }
 
 int main() {
-    char UserInput[64];
-    validator_func validate;
-    srand(time(NULL) % 100);
+    char userInput[64];
     
-    printf("===== CTF Level 5 Challenge =====\n");
-    printf("This challenge requires deeper analysis.\n");
-    printf("Enter the flag to proceed:\n> ");
+    printf("===== CTF Level 4 Challenge =====\n");
+    printf("Find and enter the correct flag:\n> ");
     
-    fgets(UserInput, sizeof(UserInput), stdin);
+    fgets(userInput, sizeof(userInput), stdin);
     
-    size_t len = strlen(UserInput);
-    if (len > 0 && UserInput[len - 1] == '\n') {
-        UserInput[len - 1] = '\0';
+    size_t len = strlen(userInput);
+    if (len > 0 && userInput[len - 1] == '\n') {
+        userInput[len - 1] = '\0';
     }
-    clock_t start = clock();
-   
 
-    int selector = rand() % 4;
-    if (selector == 0 || selector == 2 || selector == 3) {
-        validate = actualValidator;
+    if (validateFlag(userInput) == 0) {
+        printf("\nCongratulations! You found the correct flag!\n");
     } else {
-        validate = decoyValidator;
+        printf("\nWrong!\n");
     }
-    
 
-    if ((strlen(UserInput) > 3) && ((UserInput[0] + UserInput[1]) % 256 != 0)) {
-        validate = actualValidator;
-    }
-    
-    clock_t end = clock();
-    double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-    if (time_spent > 0.1) {
-        printf("Processing error. Please try again.\n");
-        return 1;
-    }
-    
-    printHash(UserInput);
-    if (validate(UserInput)) {
-        printf("\nExcellent! You've cracked level 5!\n");
-    } else {
-        printf("\nIncorrect. Try again.\n");
-    }
-    
     return 0;
 }
-
-/*
-   The correct flag is CTF_5_{53615844327}
-   
-   This challenge requires:
-   1. Understanding the validation is done via hash comparison
-   2. Realizing the validator selection logic always selects actualValidator
-   3. Either brute-forcing, reverse engineering the hash, or finding the hash 
-      collision for the correct flag
-*/

@@ -1,10 +1,8 @@
-// CTF_Level1
-
 #include <stdio.h>
 #include <string.h>
 
 int main() {
-  char flag[17] = "CTF_1_{266152184}";
+  char flag[17] = "CTF_1_{853648575}";
   char UserInput[20];
 
   printf("===== CTF Level 1 Challenge =====\n");
@@ -29,8 +27,4 @@ int main() {
   return 0;
 }
 
-/*
-The flag is CTF_1_{266152184}
-the flag is stored in the main function.
-os go to the main and see the flag.
-*/
+
