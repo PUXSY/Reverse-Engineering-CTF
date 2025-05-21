@@ -17,7 +17,7 @@ the levels difficulty
 | 5 | **medium**|
 | 6 | **medium**|
 | 7 | **medium**|
-| 8 | **hard** (It's not working and but to fix it.)|
+| 8 | **hard** (working on it.)|
 | 9 | **hard**|
 
 

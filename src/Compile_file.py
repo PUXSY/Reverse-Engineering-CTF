@@ -236,7 +236,7 @@ def Print_Summary(success_count: int, moved_files_count: int, move_success: bool
 
 def main() -> None:
     error_list.clear()
-    files = Get_files_name_to_compile("./")
+    files = Get_all_files_name("./")
     new_move_dir = "../Executables"
     success_count = Compile_file(files)
     new_files = Get_all_files_name("./")
