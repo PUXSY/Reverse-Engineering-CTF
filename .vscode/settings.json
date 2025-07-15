@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "*.sql": "sql",
-        "*.slint": "slint",
-        "xstring": "cpp"
-    }
-}
