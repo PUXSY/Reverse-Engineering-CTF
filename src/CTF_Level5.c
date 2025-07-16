@@ -77,7 +77,7 @@ int validateFlag(char *userInput) {
 int main() {
     char userInput[64];
     
-    printf("===== CTF Level 4 Challenge =====\n");
+    printf("===== CTF Level 5 Challenge =====\n");
     printf("Find and enter the correct flag:\n> ");
     
     fgets(userInput, sizeof(userInput), stdin);

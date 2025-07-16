@@ -8,14 +8,14 @@ CURRENT_PATH = Path(__file__).parent.resolve()
 ERROR_LIST: list[str] = []
 
 # Standard file types and their compilation commands
-FILE_TYPES = [
+FILE_TYPES: list[ str, list[str | object] ] = [
     ('.c', ["gcc", "-s", "{file_path}", "-o", "{output_file}"]),
     ('.cpp', ["g++", "-s", "{file_path}", "-o", "{output_file}"]),
     ('.rs', ["rustc", "{file_path}", "--out-dir", "{current_path}"]),
 ]
 
 # Custom compile commands for specific files
-CUSTOM_COMMANDS = [
+CUSTOM_COMMANDS: list[ str, str, list[str | object] ] = [
     # Format: (filename, extension, [command])
     ( "CTF_Level10.cpp", ".cpp", [ "g++", "-std=c++11", "-mwindows", "-g", "-o", "{output_file}", "{file_path}", "-IC:/vcpkg/installed/x64-mingw-static/include", "-LC:/vcpkg/installed/x64-mingw-static/lib", "-lglew32", "-lglfw3", "-lopengl32", "-lgdi32" ] )
 ]
@@ -179,14 +179,11 @@ def main():
     """Main execution function."""
     ERROR_LIST.clear()
     
-    # Get all files and compile them
     files = get_files()
     compiled_count = compile_files(files)
     
-    # Move executables
     move_success, moved_count = move_executables()
     
-    # Print summary
     print_summary(compiled_count, moved_count, move_success)
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ int main() {
     validator_func validate;
     srand(time(NULL) % 100);
     
-    printf("===== CTF Level 5 Challenge =====\n");
+    printf("===== CTF Level 6 Challenge =====\n");
     printf("This challenge requires deeper analysis.\n");
     printf("Enter the flag to proceed:\n> ");
     

@@ -293,7 +293,7 @@ int main() {
       return 1;
   }
 
-  std::cout << "===== CTF Level 6 Challenge =====" << std::endl;
+  std::cout << "===== CTF Level 7 Challenge =====" << std::endl;
   std::cout << "This challenge requires deeper analysis.\n" << std::endl;
   std::cout << "Enter the flag to proceed:\n> ";
   std::getline(std::cin, userInput);
