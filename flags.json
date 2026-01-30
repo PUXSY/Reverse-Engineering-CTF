@@ -1,0 +1,58 @@
+{
+    "flags": {
+        "Level 1": {
+            "flag": "bb94fc88a23f58436e46d6e005ae541982f763cfe63132b2395ade5a126980c643c2e8112d2ee9f69ad5d21b0036104fb26e0a9e66ec4494645908f7f6ea2e90", 
+            "points": 10,
+            "note": "CTF_1_{853648575}"
+        },
+        "Level 2": {
+            "flag": "c8d8377738c92cd01c8607959b3fc327941d0eaa7584b2d75f56860462bd729d5c72cff3c393abb3e60fd646458ef81c2516914a42fab783cad0e23f56207552",
+            "points": 15,
+            "note": "CTF_2_{779841834}"
+        },
+        "Level 3": {
+            "flag": "dde8140298e7479721a51267b897ea891a54341fbbde0b0f17683d51ed07e9de44d0ac7db477e7e0995fcc971872568008b36bfaaf7e411178f842549aa142a3",
+            "points": 15,
+            "note": "CTF_3_{296815815}"
+        },
+        "Level 4": {
+            "flag": "5062b192d1d9bd700769324c0e56360efbfc8407dfb0e7b7897b04db8eb945454eebfe815cf56ca304e212478d2db0fbe4389bcf89d48d554b351f860ff19f07",
+            "points": 20,
+            "note": "CTF_4_{84536134584571335}"
+        },
+        "Level 5": {
+            "flag": "f8d4619eac2debeee3f5e496cae1aef8e6cd036498b35e9f701cf1d83d97f7090038462607e32fdcc8d2234adee66b3e6f0d33fbd692ffbd74bf757f377c55ad",
+            "points": 50,
+            "note": "CTF_5_{26335578926497164}"
+        },
+        "Level 6": {
+            "flag": "36124c295d5a5f08a627b18175bc592489da8b7700453ca6d71bb7d492e36dc2d29f0984184d4e6b16e694b70dae8d1701322635dd1c20e9b6dafd01ce9818ea",
+            "points": 90,
+            "note": "CTF_6_{19699781789563757}"
+        },
+        "Level 7": {
+            "flag": "9995dc6b90f1a3cb3482d31f7f89077d3246b118649a10314c86513dc19f9b398a6a7c54fc6e5ff2bb9bbfbafdc046cac1e1d6e432e4b71ba6d98988fc0691d3",
+            "points": 100,
+            "note": "CTF_7_{38529753492223423}"
+        },
+        "Level 8": {
+            "flag": "00cd2fe14d8e13d5d1ab5ff17e8b1119c9a936b3be6db8b22e37fbedc8ecd0d077c0a7a8c4e41621569dc2218147c2d47fa5e0303fdf1daef1e633d5506e6ebb",
+            "points": 200,
+            "note": "CTF_8_{9949979838896943525844774}"
+        },
+        "Level 9": {
+            "flag": "179068193df0907b415593ee4d3b8105ef61cfe98ac9de901def19bd586e89d73ffd98f5bfe8ef3eb68fbd63b4ff18c871a240b221df86b3fe1601279a45f641",
+            "points": 200,
+            "note": "CTF_9_{4174627461531552342997989}"
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
