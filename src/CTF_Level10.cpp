@@ -14,7 +14,7 @@ struct Vec2f
     float x, y;
 };
 
-inline constexpr int pt = 0;
+inline constexpr int pt = 1;
 // 2 ^ 16 = 65536 bits, enough for a large text buffer 
 char text_buffer[65536]; 
 const Color Black = {0.0f, 0.0f, 0.0f};
