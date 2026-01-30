@@ -2,6 +2,10 @@ from pathlib import Path
 import subprocess
 import os
 import shutil
+from colorama import Fore, Style, init
+
+# Initialize colorama
+init(autoreset=True)
 
 # Configuration
 CURRENT_PATH = Path(__file__).parent.resolve()
@@ -82,7 +86,7 @@ def compile_file(file_path: Path) -> bool:
     
     if result.returncode != 0:
         error_msg = f"Error compiling {file_path.name}:\n{result.stderr}"
-        print(error_msg)
+        print(f"{Fore.RED}[FAILED] {error_msg}{Style.RESET_ALL}")
         ERROR_LIST.append(error_msg)
         return False
     
@@ -92,7 +96,7 @@ def compile_file(file_path: Path) -> bool:
         if pdb_file.exists():
             os.remove(pdb_file)
     
-    print(f"✓ Compiled {file_path.name} successfully")
+    print(f"{Fore.GREEN}[OK] Compiled {file_path.name} successfully{Style.RESET_ALL}")
     return True
 
 def compile_files(files: list[str]) -> int:
@@ -104,10 +108,6 @@ def compile_files(files: list[str]) -> int:
         file_path = Path(file)
         
         if file_path.is_dir():
-            continue
-        
-        command = get_compile_command(file_path)
-        if not command:
             continue
             
         if compile_file(file_path):
@@ -124,12 +124,13 @@ def compile_files(files: list[str]) -> int:
     
     return success_count
 
-def move_executables(target_dir: str = "../Executables") -> tuple[bool, int]:
+def move_executables(target_dir: str = "../../Executables") -> tuple[bool, int]:
     """Move all executable files to target directory. NEVER delete source files."""
     target_path = CURRENT_PATH / target_dir
     target_path.mkdir(parents=True, exist_ok=True)
     
-    exe_files = [f for f in get_files() if f.endswith('.exe')]
+    # Look for exe files in the parent directory (src folder where files were compiled)
+    exe_files = [f for f in get_files("../") if f.endswith('.exe')]
     moved_count = 0
     
     for exe_file in exe_files:
@@ -144,36 +145,30 @@ def move_executables(target_dir: str = "../Executables") -> tuple[bool, int]:
             # Double check it's actually an executable before removing
             if file_path.suffix.lower() == '.exe' and file_path.exists():
                 os.remove(file_path)
-                print(f"✓ Moved {file_path.name} to {target_dir}")
+                print(f"{Fore.GREEN}[OK] Moved {file_path.name} to {target_dir}{Style.RESET_ALL}")
                 moved_count += 1
             else:
-                print(f"✗ Skipped moving {file_path.name} - not an executable")
+                print(f"{Fore.RED}[X] Skipped moving {file_path.name} - not an executable{Style.RESET_ALL}")
             
         except Exception as e:
             error_msg = f"Error moving {exe_file}: {e}"
-            print(f"✗ {error_msg}")
+            print(f"{Fore.RED}[X] {error_msg}{Style.RESET_ALL}")
             ERROR_LIST.append(error_msg)
     
     return moved_count > 0, moved_count
 
 def print_summary(compiled: int, moved: int, move_success: bool):
     """Print final summary with colors."""
-    GREEN = "\033[92m"
-    RED = "\033[91m"
-    BLUE = "\033[94m"
-    BOLD = "\033[1m"
-    RESET = "\033[0m"
-    
-    print(f"\n{BOLD}{BLUE}{'='*20} SUMMARY {'='*20}{RESET}")
-    print(f"{BOLD}Compiled:{RESET} {GREEN}{compiled} files{RESET}")
+    print(f"\n{Fore.CYAN}{Style.BRIGHT}{'='*20} SUMMARY {'='*20}{Style.RESET_ALL}")
+    print(f"{Style.BRIGHT}Compiled:{Style.RESET_ALL} {Fore.GREEN}{compiled} files{Style.RESET_ALL}")
     
     if ERROR_LIST:
-        print(f"{BOLD}Errors:{RESET} {RED}{len(ERROR_LIST)} files failed{RESET}")
+        print(f"{Style.BRIGHT}Errors:{Style.RESET_ALL} {Fore.RED}{len(ERROR_LIST)} files failed{Style.RESET_ALL}")
         for i, error in enumerate(ERROR_LIST, 1):
-            print(f"{RED}  {i}. {error}{RESET}")
+            print(f"{Fore.RED}  {i}. {error}{Style.RESET_ALL}")
     
-    print(f"{BOLD}Moved:{RESET} {GREEN if move_success else RED}{moved} executables{RESET}")
-    print(f"{BOLD}{BLUE}{'='*48}{RESET}")
+    print(f"{Style.BRIGHT}Moved:{Style.RESET_ALL} {Fore.GREEN if move_success else Fore.RED}{moved} executables{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}{Style.BRIGHT}{'='*48}{Style.RESET_ALL}")
 
 def main():
     """Main execution function."""
