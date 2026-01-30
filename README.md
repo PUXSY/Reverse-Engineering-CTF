@@ -85,7 +85,7 @@ Welcome to **Reverse Engineering CTF** — where your curiosity meets cryptic bi
 ## ❤️ Credits & Version
 
 * **Author:** [@PUXSY](https://github.com/PUXSY)
-* **Version:** 1.1
+* **Version:** 2.1
 * **License:** MIT
 
 
