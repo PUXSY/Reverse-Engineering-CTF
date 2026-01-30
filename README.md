@@ -39,6 +39,9 @@ Welcome to **Reverse Engineering CTF** — where your curiosity meets cryptic bi
    cd Reverse-Engineering-CTF/Executables
    ```
 
+Or use `Compile_file.py` to compile the code 
+or compile ursalfe.
+
 2. **Make Executable** (Linux/macOS):
    ```bash
    chmod +x RunMe_CTF.exe
@@ -71,14 +74,6 @@ Welcome to **Reverse Engineering CTF** — where your curiosity meets cryptic bi
 * **Avoid Cheating**: Don’t peek at `flags.json` — earn it!
 * **Debug Smart**: Use breakpoints and memory watches.
 * **Community Hub**: Share progress & get help in Discussions.
-
----
-
-## 📸 Suggested Images
-
-* **Hero Banner** (`images/ctf-banner.png`): A stylized lock-and-binary-art graphic.
-* **Tool Icons**: Small logos for Ghidra, IDA, x64dbg, GDB beside the Tools section.
-* **Level Previews**: Thumbnails showing hex dumps or decompiler screenshots for levels 5–9.
 
 ---
 
