@@ -5,6 +5,7 @@ import json
 import sys
 import hashlib
 
+
 def resource_path(relative_path: str) -> Path:
     try:
         base_path = Path(sys._MEIPASS)
@@ -69,7 +70,9 @@ root.title("Flag Checker")
 root.configure(bg="#393E46")
 root.geometry("650x600")
 root.resizable(False, False)
-
+icon_path = resource_path("ctf_icon_bmp.ico")
+print("Icon path:", icon_path)
+root.iconbitmap(str(icon_path))
 
 points_label = tk.Label(root, text="Points: 0", font=("Arial", 14, "bold"),
                         bg="#393E46", fg="white")
