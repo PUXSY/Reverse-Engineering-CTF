@@ -4,16 +4,14 @@
 Welcome to **Reverse Engineering CTF** — where your curiosity meets cryptic binaries! Sharpen your analysis, bust open obfuscated code, and uncover hidden flags across nine thrilling levels.
 
 ---
-
 ![CTF Banner](https://i.ibb.co/Kp9tdqwp/New-Project.webp)
 
-## 🌟 Why Play?
-- **Hands-on Learning**: Hone skills with real-world binaries and source insights.
-- **Progressive Difficulty**: From easy warm-ups to brain-bending puzzles.
-- **Learn Tools**: Dive deeper with Ghidra, IDA Pro, x64dbg, GDB, and more.
-- **Community Fun**: Share hints, compare strategies, and rock the scoreboard!
+## Quick overview
+Levels: 10 challenges (Easy → Hard) covering string obfuscation, control flow, stack analysis, pointer math, import resolution, anti-debugging, loop unrolling, and multi-layer obfuscation.
 
----
+Audience: Students, hobbyists, and entry-level reverse engineers.
+
+
 
 ## 📋 Levels Overview
 | Level | Difficulty | Description                                |
@@ -27,37 +25,28 @@ Welcome to **Reverse Engineering CTF** — where your curiosity meets cryptic bi
 | 7     | 🔧 Medium  | Simple anti-debug trick.                   |
 | 8     | 🚀 Hard    | Complex loop unrolling & math puzzle.      |
 | 9     | 🚀 Hard    | Finale — multi-layer obfuscation showdown. |
-
-> 🎯 **Flag Format:** `CTF_level_{your_flag_here}`
-
+| 10    | 🌱 Easy    | New GUI chaleng                            |
 
 
-## 🚀 Getting Started
-1. **Clone** the repo:
+
+## Getting started
+
+clone the repo and copy the executables folder locally: 
+#### **Clone** the repo:
    ```bash
    git clone https://github.com/PUXSY/Reverse-Engineering-CTF.git
-   cd Reverse-Engineering-CTF/Executables
+   cp -r Reverse-Engineering-CTF/Executables ./Executables
    ```
 
-Or use `Compile_file.py` to compile the code 
-or compile ursalfe.
+You can either:
+- Run the precompiled binaries in `./Executables` (recommended for quick testing).
+- Build from source using GCC/G++ (examples below), or use the Python helper in `src\Utilities\Compile_file.py`.
 
-2. **Make Executable** (Linux/macOS):
-   ```bash
-   chmod +x RunMe_CTF.exe
-   ```
 
-3. **Launch & Solve**:
-   ```bash
-   ./RunMe_CTF.exe
-   ```
-   Enter flags as you find them!
-
-> 💡 *Windows users:* Just double‑click `RunMe_CTF.exe`.
 
 ---
 
-## 🔧 Tools & References
+## 🔧 RECOMENDED Tools & References
 
 | Tool        | Link                                                                                                 |
 | ----------- | -------------------------------------------------------------------------------------|
@@ -66,21 +55,10 @@ or compile ursalfe.
 | **x64dbg**  | [https://x64dbg.com/](https://x64dbg.com/)                                                           |
 | **GDB**     | [https://www.gnu.org/software/gdb](https://www.gnu.org/software/gdb)                                 |
 
----
-
-## 💡 Hints & Tips
-
-* **Explore `src/`**: Detailed source snippets with comments.
-* **Avoid Cheating**: Don’t peek at `flags.json` — earn it!
-* **Debug Smart**: Use breakpoints and memory watches.
-* **Community Hub**: Share progress & get help in Discussions.
 
 ---
 
-## ❤️ Credits & Version
-
-* **Author:** [@PUXSY](https://github.com/PUXSY)
-* **Version:** 2.1
-* **License:** MIT
+### ❤️ Credits & Version
+ **Author:** [@PUXSY](https://github.com/PUXSY) **Version:** 2.2 **License:** MIT
 
 

@@ -9,6 +9,9 @@ BG = "#272b30"
 FG = "white"
 CORECT = "#6bbd45"
 
+WINDOW_WIDTH = 650
+WINDOW_HEIGHT = 600
+
 def resource_path(relative_path: str) -> Path:
     try:
         base_path = Path(sys._MEIPASS)
@@ -72,7 +75,7 @@ def check_input(flag_name):
 root = tk.Tk()
 root.title("Flag Checker")
 root.configure(bg=BG)
-root.geometry("650x600")
+root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
 root.resizable(False, False)
 icon_path = resource_path("ctf_icon_bmp.ico")
 print("Icon path:", icon_path)
@@ -113,7 +116,8 @@ for flag_name in flags:
     section_label.pack(side="left", padx=(0, 20))
     label_dict[flag_name] = section_label
 
-    entry = tk.Entry(row_frame, font=("Arial", 14), width=35) 
+    entry_width = WINDOW_WIDTH // 16  - len(flag_name)
+    entry = tk.Entry(row_frame, font=("Arial", 14), width=entry_width)
     entry.pack(side="left", padx=(0, 20))
     entry_dict[flag_name] = entry
 

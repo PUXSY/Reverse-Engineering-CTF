@@ -46,17 +46,6 @@ def ascii(word):
 
     print("set_" + new_word[:max_len])
 
-def main() -> None:
-    level_start = 1
-    level_end = 13
-    added_by = 8
-    base_random = 9
-    
-    for flag_level in range(level_start, level_end + 1, 1):
-        if (flag_level % 4) == 0:
-            base_random += added_by
-        print(Generate_flag(flag_level, level_start, base_random, 9))
-
 
 
 def resource_path(relative_path: str) -> Path:
@@ -97,12 +86,9 @@ def Get_Flags_list(path_to_json: Path | str) -> tuple[dict[str, str], dict[str, 
 
     return flags
 
-def flags_sha512(path_to_json: Path | str) -> None:
-    try:
-        path = Path(path_to_json).resolve()
-    except Path.exists(path_to_json):
-        path = resource_path(path_to_json)
-    return path
+def flags_sha512(flag:  str) -> str:
+    return hashlib.sha512(flag.encode()).hexdigest()
+
 
 def cut_string_middle(s: str, cuts: int) -> list[str]:
     if cuts <= 0:
@@ -120,5 +106,18 @@ def cut_string_middle(s: str, cuts: int) -> list[str]:
     result.append(s[(cuts * part_length):])
     return result
 
+
+
+def main() -> None:
+    level_start = 1
+    level_end = 10
+    added_by = 8
+    base_random = 9
+    
+    for flag_level in range(level_start, level_end + 1, 1):
+        if (flag_level % 4) == 0:
+            base_random += added_by
+        print(Generate_flag(flag_level, level_start, base_random, 9))
+
 if __name__ == "__main__": 
-    main()
+    print(flags_sha512("CTF_10_{2277291236541222122641289}"))

@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 #define STB_EASY_FONT_IMPLEMENTATION
 #include "./Assets/stb_easy_font.h"
-#include <windows.h>
-
+#include <winsock2.h>
+#include <string.h>
+#include <set>
+#include <sstream>
 
 struct Color {
     float r, g, b;
@@ -14,15 +16,15 @@ struct Vec2f
     float x, y;
 };
 
-inline constexpr int pt = 1;
+constexpr int pt = 1;
 // 2 ^ 16 = 65536 bits, enough for a large text buffer 
 char text_buffer[65536]; 
 const Color Black = {0.0f, 0.0f, 0.0f};
-const Color White = {1.0f, 1.0f, 1.0f};
+const Color White = {1.0f, 1.0f, 1.0f}; 
 
-bool my_condition(int argc, const char** argv) {
+bool my_first_condition(int argc, const char** argv) {
     if (argc > 1) {
-        if(argv[1] == "0x66757879") {
+        if(strcmp(argv[1], "0x66757879") == 0) {
             if(argc <= 2) {
                 if(pt == 1) {
                     return true; 
@@ -31,6 +33,77 @@ bool my_condition(int argc, const char** argv) {
         }
     }
     return false; 
+}
+
+std::string WINAPI ReadFromAFile(const std::string& filename, size_t maxSize = 1024)
+{
+    std::string result;
+
+    FILE* fileReader = fopen(filename.c_str(), "r");
+    if (!fileReader)
+        return {}; // return empty string on failure
+
+    char* buffer = new char[maxSize + 1];
+    buffer[maxSize] = '\0';
+
+    size_t bytesRead = fread(buffer, 1, maxSize, fileReader);
+    fclose(fileReader);
+
+    result.assign(buffer, bytesRead);
+    delete[] buffer;
+    return result;
+}
+
+bool my_second_condition()
+{
+    const std::string fileContent = ReadFromAFile("./Permissions.txt", 64);
+
+    if (fileContent.empty())
+        return false;
+
+    // Numbers we REQUIRE (exactly these, no more, no less)
+    std::set<int> required = {102, 108, 97, 103};
+    std::set<int> found;
+
+    std::istringstream stream(fileContent);
+    std::string line;
+
+    while (std::getline(stream, line))
+    {
+        // Remove possible \r (Windows line endings)
+        if (!line.empty() && line.back() == '\r')
+            line.pop_back();
+
+        // Skip empty lines
+        if (line.empty())
+            continue;
+
+        // Try to parse the line as an integer
+        std::istringstream lineStream(line);
+        int value;
+        
+        // Check if we can read an integer and that nothing else follows
+        if (lineStream >> value)
+        {
+            // Check if there's anything else on the line (besides whitespace)
+            std::string remainder;
+            if (lineStream >> remainder)
+            {
+                // There's extra content on the line - fail
+                return false;
+            }
+            
+            found.insert(value);
+        }
+        else
+        {
+            // Line contains non-integer content - fail
+            return false;
+        }
+    }
+
+    // Check if found set exactly matches required set
+    return found == required;
 }
 
 bool anti_debug_check(){
@@ -85,13 +158,18 @@ void drawText(const Vec2f& pos2D, const char* text, const Color& color, float sc
    glPopMatrix();
 }
 
-void BgGreenColor(){
-    glClearColor(0.0f, 1.0f, 0.0f, 1.0f); 
+void successWindow(){
+    glClearColor(0.0f, 255.0f, 0.0f, 1.0f); 
     drawText({400, 200}, "Flag", White, 10.0);
 }
 
-void BgRedColor(){
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f); 
+void mediumWindow(){
+    glClearColor(255.0f, 126.0f, 0.0f, 1.0f); 
+    drawText({400, 200}, "Almost but not enough", White, 5.0f);
+}
+
+void standardWindow(){
+    glClearColor(255.0f, 0.0f, 0.0f, 1.0f);
     drawText({400, 200}, "No Flag", White, 10.0);
 }
 
@@ -131,11 +209,16 @@ int main(int argc, const char** argv) {
         glPushMatrix();
         glLoadIdentity();
 
+
         // Set background and draw text
-        if (my_condition(argc, argv)) {
-            BgGreenColor(); 
+        if (my_first_condition(argc, argv) == true) {
+            if (my_second_condition() == true) {
+                successWindow();
+            } else {
+                mediumWindow();
+            }
         } else {
-            BgRedColor();
+            standardWindow();
         }
 
         // Restore matrices
@@ -152,3 +235,5 @@ int main(int argc, const char** argv) {
     glfwTerminate();
     return 0;
 }
+
+// g++ -std=c++11 -mwindows -g -o C:\Users\User\source\Projects\Reverse-Engineering-CTF\src\Utilities\..\CTF_Level10.exe C:\Users\User\source\Projects\Reverse-Engineering-CTF\src\Utilities\..\CTF_Level10.cpp -IC:/vcpkg/installed/x64-mingw-static/include -LC:/vcpkg/installed/x64-mingw-static/lib -lglew32 -lglfw3 -lopengl32 -lgdi32

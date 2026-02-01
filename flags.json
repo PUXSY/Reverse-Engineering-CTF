@@ -35,6 +35,10 @@
         "Level 9": {
             "flag": "179068193df0907b415593ee4d3b8105ef61cfe98ac9de901def19bd586e89d73ffd98f5bfe8ef3eb68fbd63b4ff18c871a240b221df86b3fe1601279a45f641",
             "points": 200
+        },
+        "Level 10": {
+            "flag": "da34ddae94ca69d57c85c790419cb26967d0178c440a311a99f2312a9f609a6fb3af2ae168e90ffaa47b6b6ea9492acb976b0ce3406a71c33289691763cd6e7d",
+            "points": 200
         }
     }
 }

@@ -1,4 +1,3 @@
-// CTF Level 6 
 #include <string>
 #include <bitset>
 #include <iostream>
