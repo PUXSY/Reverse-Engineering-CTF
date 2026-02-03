@@ -5,8 +5,6 @@ import json
 import sys
 import hashlib
 
-# TEST
-
 BG = "#272b30"
 FG = "white"
 CORECT = "#6bbd45"

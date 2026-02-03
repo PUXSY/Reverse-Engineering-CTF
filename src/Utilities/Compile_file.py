@@ -190,11 +190,22 @@ def main():
     
     move_success, moved_count = move_executables()
     
-    if file_changed_since_last_commit(GUI_PATH) == True:
-        result = subprocess.run(["python", str(CURRENT_PATH / "Compile_GUI.py")], capture_output=True, text=True)
+    if file_changed_since_last_commit(GUI_PATH):
+        print(f"\n{Fore.YELLOW}[*] GUI file has changes, recompiling...{Style.RESET_ALL}")
+        result = subprocess.run(
+            ["python", str(CURRENT_PATH / "Compile_GUI.py")], 
+            capture_output=True, 
+            text=True
+        )
         if result.returncode != 0:
             print(f"{Fore.RED}[X] GUI compilation failed{Style.RESET_ALL}")
-    
+            print(result.stderr)
+        else:
+            print(f"{Fore.GREEN}[OK] GUI compiled successfully{Style.RESET_ALL}")
+    else:
+        print(f"\n{Fore.CYAN}[*] GUI file unchanged, skipping recompilation{Style.RESET_ALL}")
+            
+            
     print_summary(compiled_count, moved_count, move_success)
 
 if __name__ == "__main__":
