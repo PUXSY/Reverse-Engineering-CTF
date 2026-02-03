@@ -10,6 +10,17 @@ init(autoreset=True)
 # Configuration
 CURRENT_PATH = Path(__file__).parent.resolve()
 ERROR_LIST: list[str] = []
+GUI_PATH = CURRENT_PATH / "RunMe_CTF.py"
+
+def file_changed_since_last_commit(file_path: str | Path) -> bool:
+    file_path = Path(file_path)
+
+    result = subprocess.run(
+        ["git", "diff", "--quiet", "--", str(file_path)],
+        capture_output=True
+    )
+
+    return result.returncode == 1
 
 # Standard file types and their compilation commands
 FILE_TYPES: list[ str, list[str | object] ] = [
@@ -178,6 +189,11 @@ def main():
     compiled_count = compile_files(files)
     
     move_success, moved_count = move_executables()
+    
+    if file_changed_since_last_commit(GUI_PATH) == True:
+        result = subprocess.run(["python", str(CURRENT_PATH / "Compile_GUI.py")], capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"{Fore.RED}[X] GUI compilation failed{Style.RESET_ALL}")
     
     print_summary(compiled_count, moved_count, move_success)
 

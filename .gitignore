@@ -1,2 +1,5 @@
 flags.txt
 ctf_icon_bmp.ico
+Compile_GUI.py
+.gitattributes
+.gitignore
