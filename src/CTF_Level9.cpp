@@ -1,192 +1,97 @@
-#include <iostream>
-#include <string>
+#include <stdio.h>
 #include <sstream>
-#include <windows.h>
-#include <vector>
-#include <numeric>
-#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <cstdint>  // Added missing header for uint64_t
+#include <cstring>  // Added for fgets
+#include <string>   // Added for std::string
+#include <algorithm> // Added for std::min
+
+#define NOMINMAX  // Prevent Windows from defining min/max macros
+#include <windows.h> // Added for Windows API functions
 
 #define MAX_INPUT_LEN 255
-#pragma comment(linker, "/SUBSYSTEM:console /ENTRY:StartUp");
+const char flag[38] = "681e91fd69229a93";
 
+namespace obf {
+    using u64 = uint64_t;
 
-const std::vector<std::string> encrypted_flag = {"0x84", "0x85", "0xb2", "0xac", "0xab", "0x85", "0xb2", "0x84", "0x8e", "0xba", "0xa5", "0xb9", "0x72", "0xbc", "0x8f", "0xbc"};
+    // Obfuscated constants
+    static const u64 xCEA9 = 0x9e3779b97f4a7c15ULL; 
+    static const u64 xCF88 = 0xbf58476d1ce4e5b9ULL; 
+    static const u64 xCEBE = 0x94d049bb133111ebULL; 
 
-
-int main();
-bool anti_debug_check();
-
-const int StartUp(int argc, char** argv) {
-    anti_debug_check();
-    return main();
-};
-
-bool anti_debug_check(){
-    if ( IsDebuggerPresent() )
-    {
-      MessageBoxA(0LL, "Debugger Detected!", "Bye", 0);
-      ExitProcess(0);
-    }
-    return CloseHandle((HANDLE)0xDEADC0DELL);
-}
-
-
-std::string magic_num_hash(const std::string& input, size_t length) {
-    std::string ascii_val;
-    for (char c : input) {
-        ascii_val += std::to_string(static_cast<int>(c));
-    }
-    
-    unsigned int magic = 0;
-    for (char c : input) {
-        magic += static_cast<int>(c);
-    }
-    magic = magic / input.length();
-
-    long long ascii_ret = std::stoi(ascii_val.substr(0, 2));
-    for (size_t i = 0; i < ascii_val.length() - 1; i += 2) {
-        if (i + 2 <= ascii_val.length()) {
-            ascii_ret = (ascii_ret + std::stoi(ascii_val.substr(i, 2))) * magic;
-        }
+    // Mix function: split, xor, rotate, multiply
+    inline u64 mix(u64 x) {
+        x ^= x >> 30;
+        x *= xCF88;
+        x ^= x >> 27;
+        x *= xCEBE;
+        x ^= x >> 31;
+        return x;
     }
 
-    std::stringstream ss;
-    ss << std::hex << (ascii_ret ^ length);
-    return ss.str();
-}
-
-std::vector<std::string> locl_encrypt(const std::string& inp) {
-
-    std::vector<std::string> new_inp;
-    int magic = 0;
-    
-    for (char c : inp) {
-        magic += static_cast<int>(c);
-    }
-    
-    magic = magic / inp.length();
-    
-    for (size_t char_index = 0; char_index < inp.length(); char_index++) {
-        int char_val = static_cast<int>(inp[char_index]) + magic;
-        int xor_val = char_val ^ char_index;
-        
-        std::stringstream ss;
-        ss << "0x" << std::hex << xor_val;
-        new_inp.push_back(ss.str());
-    }
-    
-    return new_inp;
-}
-
-
-
-std::string locl_decrypt(const std::vector<std::string>& inp) {
-    std::vector<int> temp_values;
-    
-    for (size_t i = 0; i < inp.size(); i++) {
-        std::string hex_str = inp[i];
-        if (hex_str.substr(0, 2) == "0x") {
-            hex_str = hex_str.substr(2);
-        }
-        
-        int hex_val = std::stoi(hex_str, nullptr, 16);
-        temp_values.push_back(hex_val ^ i);
-    }
-
-    int sum = std::accumulate(temp_values.begin(), temp_values.end(), 0);
-    int magic = sum / (2 * inp.size());
-    
-    std::string result = "";
-    for (size_t i = 0; i < inp.size(); i++) {
-        std::string hex_str = inp[i];
-        if (hex_str.substr(0, 2) == "0x") {
-            hex_str = hex_str.substr(2);
-        }
-        
-        int hex_val = std::stoi(hex_str, nullptr, 16);
-        int xor_val = hex_val ^ i;
-        int original_ascii = xor_val - magic;
-        
-        result += static_cast<char>(original_ascii);
-    }
-    
-    return result;
-}
-
-class cli {
-    public:
-        std::string input;
-    
-        void print() {
-            std::cout << "===== CTF Level 9 Challenge =====" << std::endl;
-            std::cout << "This challenge requires deeper analysis.\n" << std::endl;
-            std::cout << "Enter the flag to proceed:\n> ";
-        }
-        
-        void get_input(std::string input) {
-            this->input = input;
-        }
-        
-        void ui() {
-            if (this->input == flag1) {
-                this->hint();
+    // Core obscure hasher
+    std::string hash(const std::string& s) {
+        u64 h = xCEA9;
+        // process each group of up to 8 bytes
+        for (size_t i = 0; i < s.size(); i += 8) {
+            u64 chunk = 0;
+            size_t end = (std::min)(s.size() - i, size_t(8));
+            for (size_t j = 0; j < end; ++j) {
+                // reverse bit order of each byte
+                auto b = static_cast<u64>(s[i + j]);
+                b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4);
+                b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2);
+                b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1);
+                chunk |= (b << (j * 8));
             }
-    
-            if (this->input == flag2) {
-                this->kaki();
-            }
+            h ^= mix(chunk ^ (h + xCEA9));
         }
-    
-    private:
-        std::string flag1 = "hint";
-        std::string flag2 = "kaki";
-        
-        void hint() {
-            std::cout << "Think harder!" << std::endl;
+        // final avalanche
+        h = mix(h ^ (s.size() * xCEA9));
+
+        // convert to hex
+        std::ostringstream oss;
+        oss << std::hex << std::setfill('0');
+        for (int i = 0; i < 8; ++i) {
+            u64 byte = (h >> (i * 8)) & 0xFF;
+            oss << std::setw(2) << byte;
         }
-    
-        void kaki() {
-            std::cout << "Did you really think it was that easy?" << std::endl;
-        }
-}; 
+        return oss.str();
+    }
+}
 
+bool anti_debug_check() {
+    if (IsDebuggerPresent()) {
+        MessageBoxA(NULL, "Debugger Detected!", "Bye", 0);
+        ExitProcess(0);
+    }
+    return CloseHandle(reinterpret_cast<HANDLE>(0xDEADC0DE));
+}
 
-int main() {
-    anti_debug_check();
-
+int secret() {
+    printf("Enter the secret string: ");
     char userInput[MAX_INPUT_LEN];
-    cli cli_obj = cli();
-    char flag[5] = "0x6E";
-    std::string v12 = "0x68696E74";
-    std::string v13 = "0x7b";
-    char v14[5] = "0x69";
-    std::string v15 = "0x68";
-
-    cli_obj.print();
-    std::cin.getline(userInput, MAX_INPUT_LEN);
-
-
-    cli_obj.get_input(userInput);
-    cli_obj.ui();
-
-
-    v12 = magic_num_hash(userInput, strlen(userInput));
-    v13 = locl_decrypt(encrypted_flag);
-    v15 = v15 + v14 + flag + "74";
-    strcpy(v14, "kaki");
-
-
-    if (std::string(v14) != v15) {
-
-        if (v12 == v13){
-            std::cout << "Correct!" << std::endl;
-        }else{
-            std::cout << "Wrong!" << std::endl;
-        }
-    }else{
-        std::cout << "Wrong!" << std::endl;
-    }
+    fgets(userInput, MAX_INPUT_LEN, stdin);  // Fixed to use fgets properly
     
+    // Remove newline from fgets if present
+    userInput[strcspn(userInput, "\n")] = '\0';
+    
+    if (obf::hash(std::string(userInput)) == flag)
+        printf("Correct!\n");
+    else
+        printf("Incorrect!\n");
+
     return 0;
 }
 
+int main() {
+    char buffer[10];
+    anti_debug_check();
+    
+    printf("Enter a string: ");
+    fgets(buffer, sizeof(buffer), stdin);  // Fixed buffer size
+    printf("You entered: %s", buffer);  // Removed extra \n since fgets includes it
+    return 0;
+}

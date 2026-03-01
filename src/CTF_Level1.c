@@ -2,8 +2,8 @@
 #include <string.h>
 
 int main() {
-  char flag[17] = "CTF_1_{853648575}";
-  char UserInput[20];
+  char flag[47] = "CTF{CongratuLations-U_$olved-the-first_Level!}";
+  char UserInput[64];
 
   printf("===== CTF Level 1 Challenge =====\n");
   printf("Enter the flag:\n");

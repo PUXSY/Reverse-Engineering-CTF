@@ -1,10 +1,19 @@
-// CTF_Level4
+/*
+CTF_Level5
+ This program hides the correct flag as a binary string and checks your input against it.
+ - decimalToBinary() converts each character’s ASCII value into an 8-bit binary string.
+ - textToBinary() converts your whole input into space-separated binary bytes.
+ - validateFlag() XORs your binary input with the stored binaryFlag; if every bit matches, the XOR sum stays 0.
+ - main() reads your input, strips the newline, and prints Congratulations! only if the binary comparison is a perfect match.
+`https://cyberchef.org/#recipe=To_Binary('Space',8)&input=Q1RGe0FTQ0lJLWlzLW1PcmUtbGlrZV9CSU5BU0NJSSEhIX0` (HOW TO SOLVE: Convert the binary string to text to get the flag)
+*/
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-const char *binaryFlag = "01000011 01010100 01000110 01011111 00110101 01011111 01111011 00110010 00110110 00110011 00110011 00110101 00110101 00110111 00111000 00111001 00110010 00110110 00110100 00111001 00110111 00110001 00110110 00110100 01111101";
+const char *binaryFlag = "01000011 01010100 01000110 01111011 01000001 01010011 01000011 01001001 01001001 00101101 01101101 01001111 01110010 01100101 00101101 01101100 01101001 01101011 01100101 01011111 01000010 01001001 01001110 01000001 01010011 01000011 01001001 01001001 00100001 00100001 00100001 01111101";
+
 void decimalToBinary(int decimal, char *binary) {
     for (int i = 0; i < 8; i++) {
         binary[i] = '0';

@@ -1,110 +1,25 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#define STB_EASY_FONT_IMPLEMENTATION
-#include "./Assets/stb_easy_font.h"
-#include <winsock2.h>
-#include <string.h>
-#include <set>
+#include <iostream>
+#include <string>
 #include <sstream>
+#include <windows.h>
+#include <vector>
+#include <numeric>
+#include <cstring>
 
-struct Color {
-    float r, g, b;
-};  
+#define MAX_INPUT_LEN 255
+#pragma comment(linker, "/SUBSYSTEM:console /ENTRY:StartUp");
 
-struct Vec2f 
-{
-    float x, y;
+
+const std::vector<std::string> encrypted_flag = {"0x84", "0x85", "0xb2", "0xac", "0xab", "0x85", "0xb2", "0x84", "0x8e", "0xba", "0xa5", "0xb9", "0x72", "0xbc", "0x8f", "0xbc"};
+
+
+int main();
+bool anti_debug_check();
+
+const int StartUp(int argc, char** argv) {
+    anti_debug_check();
+    return main();
 };
-
-constexpr int pt = 1;
-// 2 ^ 16 = 65536 bits, enough for a large text buffer 
-char text_buffer[65536]; 
-const Color Black = {0.0f, 0.0f, 0.0f};
-const Color White = {1.0f, 1.0f, 1.0f}; 
-
-bool my_first_condition(int argc, const char** argv) {
-    if (argc > 1) {
-        if(strcmp(argv[1], "0x66757879") == 0) {
-            if(argc <= 2) {
-                if(pt == 1) {
-                    return true; 
-                }
-            }
-        }
-    }
-    return false; 
-}
-
-std::string WINAPI ReadFromAFile(const std::string& filename, size_t maxSize = 1024)
-{
-    std::string result;
-
-    FILE* fileReader = fopen(filename.c_str(), "r");
-    if (!fileReader)
-        return {}; // return empty string on failure
-
-    char* buffer = new char[maxSize + 1];
-    buffer[maxSize] = '\0';
-
-    size_t bytesRead = fread(buffer, 1, maxSize, fileReader);
-    fclose(fileReader);
-
-    result.assign(buffer, bytesRead);
-    delete[] buffer;
-    return result;
-}
-
-bool my_second_condition()
-{
-    const std::string fileContent = ReadFromAFile("./Permissions.txt", 64);
-
-    if (fileContent.empty())
-        return false;
-
-    // Numbers we REQUIRE (exactly these, no more, no less)
-    std::set<int> required = {102, 108, 97, 103};
-    std::set<int> found;
-
-    std::istringstream stream(fileContent);
-    std::string line;
-
-    while (std::getline(stream, line))
-    {
-        // Remove possible \r (Windows line endings)
-        if (!line.empty() && line.back() == '\r')
-            line.pop_back();
-
-        // Skip empty lines
-        if (line.empty())
-            continue;
-
-        // Try to parse the line as an integer
-        std::istringstream lineStream(line);
-        int value;
-        
-        // Check if we can read an integer and that nothing else follows
-        if (lineStream >> value)
-        {
-            // Check if there's anything else on the line (besides whitespace)
-            std::string remainder;
-            if (lineStream >> remainder)
-            {
-                // There's extra content on the line - fail
-                return false;
-            }
-            
-            found.insert(value);
-        }
-        else
-        {
-            // Line contains non-integer content - fail
-            return false;
-        }
-    }
-
-    // Check if found set exactly matches required set
-    return found == required;
-}
 
 bool anti_debug_check(){
     if ( IsDebuggerPresent() )
@@ -115,125 +30,163 @@ bool anti_debug_check(){
     return CloseHandle((HANDLE)0xDEADC0DELL);
 }
 
-void drawText(const Vec2f& pos2D, const char* text, const Color& color, float scale = 1.0f) {
-   // Convert color to unsigned char format
-   unsigned char textColor[4] = {
-       (unsigned char)(color.r * 255),
-       (unsigned char)(color.g * 255),
-       (unsigned char)(color.b * 255),
-       255
-   };
-   
-   int quads = stb_easy_font_print(0, 0, (char*)text, textColor, text_buffer, sizeof(text_buffer));
 
-   // Get text dimensions for centering
-   int text_width = stb_easy_font_width((char*)text);
-   int text_height = stb_easy_font_height((char*)text);
-
-   // Save current matrix
-   glPushMatrix();
-   
-   // Move to the desired position
-   glTranslatef(pos2D.x, pos2D.y, 0);
-   // Scale from center
-   glScalef(scale, scale, 1.0f);
-   // Offset by half the text size to center it
-   glTranslatef(-text_width * 0.5f, -text_height * 0.5f, 0);
-
-   // Enable vertex arrays
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_COLOR_ARRAY);
-   
-   // Set up vertex pointer for 3D coordinates (x, y, z)
-   glVertexPointer(3, GL_FLOAT, 16, text_buffer);
-   // Set up color pointer (4 bytes for RGBA, offset by 12 bytes)
-   glColorPointer(4, GL_UNSIGNED_BYTE, 16, text_buffer + 12);
-   
-   glDrawArrays(GL_QUADS, 0, quads * 4);
-   
-   glDisableClientState(GL_COLOR_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
-   
-   // Restore matrix
-   glPopMatrix();
-}
-
-void successWindow(){
-    glClearColor(0.0f, 255.0f, 0.0f, 1.0f); 
-    drawText({400, 200}, "Flag", White, 10.0);
-}
-
-void mediumWindow(){
-    glClearColor(255.0f, 126.0f, 0.0f, 1.0f); 
-    drawText({400, 200}, "Almost but not enough", White, 5.0f);
-}
-
-void standardWindow(){
-    glClearColor(255.0f, 0.0f, 0.0f, 1.0f);
-    drawText({400, 200}, "No Flag", White, 10.0);
-}
-
-int main(int argc, const char** argv) {
-    if (!glfwInit()) return -1;
-    anti_debug_check();
+std::string magic_num_hash(const std::string& input, size_t length) {
+    std::string ascii_val;
+    for (char c : input) {
+        ascii_val += std::to_string(static_cast<int>(c));
+    }
     
-    // Use compatibility profile for legacy OpenGL functions
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-
-    GLFWwindow* window = glfwCreateWindow(800, 400, "OpenGL Window", nullptr, nullptr);
-    if (!window) {
-        glfwTerminate();
-        return -1;
+    unsigned int magic = 0;
+    for (char c : input) {
+        magic += static_cast<int>(c);
     }
+    magic = magic / input.length();
 
-    glfwMakeContextCurrent(window);
-    glewExperimental = true;
-    if (glewInit() != GLEW_OK) return -1;
-
-    // Enable blending for text rendering
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    // Main render loop
-    while (!glfwWindowShouldClose(window)) {
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Set orthographic projection for 2D drawing
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        glOrtho(0, 800, 400, 0, -1, 1); // Flip Y: (0,0) is top-left
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-
-
-        // Set background and draw text
-        if (my_first_condition(argc, argv) == true) {
-            if (my_second_condition() == true) {
-                successWindow();
-            } else {
-                mediumWindow();
-            }
-        } else {
-            standardWindow();
+    long long ascii_ret = std::stoi(ascii_val.substr(0, 2));
+    for (size_t i = 0; i < ascii_val.length() - 1; i += 2) {
+        if (i + 2 <= ascii_val.length()) {
+            ascii_ret = (ascii_ret + std::stoi(ascii_val.substr(i, 2))) * magic;
         }
-
-        // Restore matrices
-        glPopMatrix();           // MODELVIEW
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();           // PROJECTION
-        glMatrixMode(GL_MODELVIEW);
-
-        glfwSwapBuffers(window);
-        glfwPollEvents();
     }
 
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    std::stringstream ss;
+    ss << std::hex << (ascii_ret ^ length);
+    return ss.str();
+}
+
+std::vector<std::string> locl_encrypt(const std::string& inp) {
+
+    std::vector<std::string> new_inp;
+    int magic = 0;
+    
+    for (char c : inp) {
+        magic += static_cast<int>(c);
+    }
+    
+    magic = magic / inp.length();
+    
+    for (size_t char_index = 0; char_index < inp.length(); char_index++) {
+        int char_val = static_cast<int>(inp[char_index]) + magic;
+        int xor_val = char_val ^ char_index;
+        
+        std::stringstream ss;
+        ss << "0x" << std::hex << xor_val;
+        new_inp.push_back(ss.str());
+    }
+    
+    return new_inp;
+}
+
+
+
+std::string locl_decrypt(const std::vector<std::string>& inp) {
+    std::vector<int> temp_values;
+    
+    for (size_t i = 0; i < inp.size(); i++) {
+        std::string hex_str = inp[i];
+        if (hex_str.substr(0, 2) == "0x") {
+            hex_str = hex_str.substr(2);
+        }
+        
+        int hex_val = std::stoi(hex_str, nullptr, 16);
+        temp_values.push_back(hex_val ^ i);
+    }
+
+    int sum = std::accumulate(temp_values.begin(), temp_values.end(), 0);
+    int magic = sum / (2 * inp.size());
+    
+    std::string result = "";
+    for (size_t i = 0; i < inp.size(); i++) {
+        std::string hex_str = inp[i];
+        if (hex_str.substr(0, 2) == "0x") {
+            hex_str = hex_str.substr(2);
+        }
+        
+        int hex_val = std::stoi(hex_str, nullptr, 16);
+        int xor_val = hex_val ^ i;
+        int original_ascii = xor_val - magic;
+        
+        result += static_cast<char>(original_ascii);
+    }
+    
+    return result;
+}
+
+class cli {
+    public:
+        std::string input;
+    
+        void print() {
+            std::cout << "===== CTF Level 10 Challenge =====" << std::endl;
+            std::cout << "This challenge requires deeper analysis.\n" << std::endl;
+            std::cout << "Enter the flag to proceed:\n> ";
+        }
+        
+        void get_input(std::string input) {
+            this->input = input;
+        }
+        
+        void ui() {
+            if (this->input == flag1) {
+                this->hint();
+            }
+    
+            if (this->input == flag2) {
+                this->kaki();
+            }
+        }
+    
+    private:
+        std::string flag1 = "hint";
+        std::string flag2 = "kaki";
+        
+        void hint() {
+            std::cout << "Think harder!" << std::endl;
+        }
+    
+        void kaki() {
+            std::cout << "Did you really think it was that easy?" << std::endl;
+        }
+}; 
+
+
+int main() {
+    anti_debug_check();
+
+    char userInput[MAX_INPUT_LEN];
+    cli cli_obj = cli();
+    char flag[5] = "0x6E";
+    std::string v12 = "0x68696E74";
+    std::string v13 = "0x7b";
+    char v14[5] = "0x69";
+    std::string v15 = "0x68";
+
+    cli_obj.print();
+    std::cin.getline(userInput, MAX_INPUT_LEN);
+
+
+    cli_obj.get_input(userInput);
+    cli_obj.ui();
+
+
+    v12 = magic_num_hash(userInput, strlen(userInput));
+    v13 = locl_decrypt(encrypted_flag);
+    v15 = v15 + v14 + flag + "74";
+    strcpy(v14, "kaki");
+
+
+    if (std::string(v14) != v15) {
+
+        if (v12 == v13){
+            std::cout << "Correct!" << std::endl;
+        }else{
+            std::cout << "Wrong!" << std::endl;
+        }
+    }else{
+        std::cout << "Wrong!" << std::endl;
+    }
+    
     return 0;
 }
 
-// g++ -std=c++11 -mwindows -g -o C:\Users\User\source\Projects\Reverse-Engineering-CTF\src\Utilities\..\CTF_Level10.exe C:\Users\User\source\Projects\Reverse-Engineering-CTF\src\Utilities\..\CTF_Level10.cpp -IC:/vcpkg/installed/x64-mingw-static/include -LC:/vcpkg/installed/x64-mingw-static/lib -lglew32 -lglfw3 -lopengl32 -lgdi32

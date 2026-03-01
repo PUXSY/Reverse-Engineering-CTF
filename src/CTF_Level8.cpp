@@ -1,97 +1,378 @@
-#include <stdio.h>
-#include <sstream>
-#include <iomanip>
+/*
+CTF_Level8
+
+This program validates a flag using a multi-step encoding pipeline.
+
+REAL FLAG VALIDATION LOGIC:
+1. The user input is converted to binary:
+   - Each character is converted to an 8-bit binary string.
+   - Example: 'A' -> 01000001
+
+2. The full binary string is padded into a 2048-bit bitset.
+
+3. The bitset is shifted right by 64 bits.
+
+4. The resulting 2048-bit binary string is Base64-encoded.
+
+5. The encoded result is compared against a hardcoded Base64 string (GetFlag()).
+
+If they match, the flag is correct.
+
+HOW I CHANGED THE FLAG:
+- Took the new flag:
+  CTF{To_be_HOne$t,-I-doN't-understand_What-I-did-Here.}
+- Converted it to binary (8 bits per character)
+- Stored it in a 2048-bit bitset
+- Shifted the bitset right by 64 bits
+- Base64-encoded the result
+- Replaced GetFlag() return value with the new encoded string
+
+HOW TO CHANGE THE FLAG AGAIN:
+- Reproduce the same encoding steps:
+  Text -> Binary -> 2048-bit bitset -> Shift right 64 -> Base64
+- Replace the value returned by GetFlag()
+
+HOW TO SOLVE THE CHALLENGE:
+- Extract GetFlag() from the binary
+- Base64-decode it
+- Shift the bits left by 64
+- Convert the binary back into ASCII text
+
+All random logic, anti-debugging checks, timing checks, corrupted arrays,
+unused XORs, and decoy validators exist only to confuse analysis and can be ignored.
+*/
+
+#include <string>
+#include <bitset>
 #include <iostream>
-#include <cstdint>  // Added missing header for uint64_t
-#include <cstring>  // Added for fgets
-#include <string>   // Added for std::string
-#include <algorithm> // Added for std::min
+#include <debugapi.h>
 
-#define NOMINMAX  // Prevent Windows from defining min/max macros
-#include <windows.h> // Added for Windows API functions
+std::string base64_key;
+std::string binary_key;
 
-#define MAX_INPUT_LEN 255
-const char flag[38] = "681e91fd69229a93";
+int start_it(int argc, std::string* base64_key, std::string* binary_key);
 
-namespace obf {
-    using u64 = uint64_t;
+static const std::string base64_chars =
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
 
-    // Obfuscated constants
-    static const u64 xCEA9 = 0x9e3779b97f4a7c15ULL; 
-    static const u64 xCF88 = 0xbf58476d1ce4e5b9ULL; 
-    static const u64 xCEBE = 0x94d049bb133111ebULL; 
+const char key[] = {
+0x54, 0x68, 0x65, 0x20, 0x72, 0x61, 0x62, 0x62, 0x69, 0x74,
+0x20, 0x68, 0x6f, 0x6c, 0x65, 0x20, 0x6e, 0x65, 0x76, 0x65,
+0x72, 0x20, 0x65, 0x6e, 0x64, 0x73, 0x2e, 0x00};
 
-    // Mix function: split, xor, rotate, multiply
-    inline u64 mix(u64 x) {
-        x ^= x >> 30;
-        x *= xCF88;
-        x ^= x >> 27;
-        x *= xCEBE;
-        x ^= x >> 31;
-        return x;
-    }
+volatile const char very_important_string_that_never_used_yeah_I_know_that_is_not_best_variable_name[] = { 0x1b, 0x31, 0x31, 0x31, 0x5e, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31,
+  0x5e, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x4d, 0x31, 0x31, 0x31, 0x31, 0x31, 
+  0x3e, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x31, 0x3c, 0x3c, 0x3c, 0x3c, 0x3c, 
+  0x1b, 0x31, 0x31, 0x3c, 0x31, 0x31, 0x6d, 0x31, 0x31, 0x31, 0x6d, 0x31,
+  0x3c, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x31, 0x5f, 0x7e, 0x65, 0x79, 
+  0x78, 0x7f, 0x76, 0x3d, 0x31, 0x73, 0x64, 0x65, 0x31, 0x65, 0x79, 0x74, 
+  0x31, 0x73, 0x74, 0x62, 0x65, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x31, 0x3c, 
+  0x3c, 0x3c, 0x3c, 0x3c, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x3e, 0x31, 0x31, 
+  0x31, 0x31, 0x31, 0x4d, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x3c, 0x3c, 0x3c, 
+  0x3c, 0x3c, 0x3c, 0x3c, 0x1b, 0x31, 0x31, 0x31, 0x31, 0x6d, 0x31, 0x31, 
+  0x31, 0x31, 0x31, 0x6d, 0x1b, 0x0d };
 
-    // Core obscure hasher
-    std::string hash(const std::string& s) {
-        u64 h = xCEA9;
-        // process each group of up to 8 bytes
-        for (size_t i = 0; i < s.size(); i += 8) {
-            u64 chunk = 0;
-            size_t end = (std::min)(s.size() - i, size_t(8));
-            for (size_t j = 0; j < end; ++j) {
-                // reverse bit order of each byte
-                auto b = static_cast<u64>(s[i + j]);
-                b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4);
-                b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2);
-                b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1);
-                chunk |= (b << (j * 8));
-            }
-            h ^= mix(chunk ^ (h + xCEA9));
-        }
-        // final avalanche
-        h = mix(h ^ (s.size() * xCEA9));
+const char corrupted[] = { 0x5d, 0x7c, 0x6d, 0x7c, 0x7a, 0x6d, 0x7c, 0x7d, 0x39, 0x7a, 0x76, 0x6b,
+                           0x6b, 0x6c, 0x69, 0x6d, 0x7c, 0x7d, 0x39, 0x74, 0x7c, 0x74, 0x76, 0x6b, 
+                           0x60, 0x38
+};
+const char ok[] = { 0x2c, 0x6c, 0x06, 0x0c, 0x04, 0x05, 0x5a, 0x3d, 0x17, 0x17, 0x17, 0x68, 0x68, 
+  0x68, 0x68, 0x17, 0x17, 0x17, 0x68, 0x68, 0x17, 0x68, 0x68, 0x3d, 0x17, 0x17, 
+  0x18, 0x17, 0x68, 0x68, 0x17, 0x6b, 0x17, 0x18, 0x17, 0x18, 0x18, 0x68, 0x18, 
+  0x3d, 0x17, 0x18, 0x17, 0x18, 0x17, 0x18, 0x17, 0x18, 0x18, 0x17, 0x1b, 0x0b, 
+  0x17, 0x17, 0x17, 0x3d, 0x18, 0x17, 0x18, 0x68, 0x18, 0x17, 0x18, 0x18, 0x17, 
+  0x18, 0x4b, 0x17, 0x4b, 0x17, 0x17, 0x3d, 0x6b, 0x68, 0x68, 0x68, 0x68, 0x18, 
+  0x18, 0x68, 0x18, 0x17, 0x4b, 0x68, 0x4b, 0x17, 0x17, 0x3d, 0x2c, 0x6c, 0x07, 
+  0x5a, 0x3d 
+};
+const char ok_l[] = { 0x17, 0x17, 0x17, 0x17, 0x17, 0x70, 0x58, 0x58, 0x53, 0x17, 0x5d, 0x58, 0x55, 
+    0x16, 0x17, 0x3d 
+  };
+const char fail[] = { 0x31, 0x71, 0x1b, 0x11, 0x19, 0x1b, 0x47, 0x20, 0x0a, 0x0a, 0x0a, 0x0a, 0x75,
+    0x75, 0x75, 0x75, 0x75, 0x75, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a,
+    0x75, 0x0a, 0x0a, 0x75, 0x75, 0x0a, 0x20, 0x0a, 0x0a, 0x0a, 0x05, 0x0a, 0x75,
+    0x75, 0x75, 0x75, 0x05, 0x75, 0x75, 0x75, 0x75, 0x0a, 0x75, 0x0a, 0x02, 0x75,
+    0x03, 0x05, 0x0a, 0x05, 0x0a, 0x20, 0x0a, 0x0a, 0x05, 0x0a, 0x05, 0x75, 0x0a,
+    0x0a, 0x0a, 0x05, 0x0a, 0x75, 0x75, 0x0a, 0x4a, 0x05, 0x05, 0x0a, 0x05, 0x05,
+    0x0a, 0x05, 0x0a, 0x0a, 0x20, 0x0a, 0x05, 0x0a, 0x75, 0x75, 0x05, 0x0a, 0x0a,
+    0x05, 0x0a, 0x05, 0x75, 0x05, 0x0a, 0x05, 0x05, 0x0a, 0x05, 0x05, 0x0a, 0x05,
+    0x75, 0x75, 0x75, 0x20, 0x05, 0x75, 0x05, 0x0a, 0x0a, 0x0a, 0x0a, 0x0a, 0x76,
+    0x75, 0x75, 0x06, 0x75, 0x05, 0x05, 0x75, 0x05, 0x05, 0x75, 0x75, 0x75, 0x75,
+    0x75, 0x05, 0x20, 0x31, 0x71, 0x1a, 0x47, 0x20
+};
+const int BIT_SIZE = 2048;
 
-        // convert to hex
-        std::ostringstream oss;
-        oss << std::hex << std::setfill('0');
-        for (int i = 0; i < 8; ++i) {
-            u64 byte = (h >> (i * 8)) & 0xFF;
-            oss << std::setw(2) << byte;
-        }
-        return oss.str();
-    }
+static inline bool is_base64(unsigned char c) {
+  return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
-bool anti_debug_check() {
-    if (IsDebuggerPresent()) {
-        MessageBoxA(NULL, "Debugger Detected!", "Bye", 0);
-        ExitProcess(0);
+std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
+  std::string ret;
+  int i = 0;
+  int j = 0;
+  unsigned char char_array_3[3];
+  unsigned char char_array_4[4];
+
+  while (in_len--) {
+    char_array_3[i++] = *(bytes_to_encode++);
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; (i <4) ; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
     }
-    return CloseHandle(reinterpret_cast<HANDLE>(0xDEADC0DE));
+  }
+
+  if (i)
+  {
+    for(j = i; j < 3; j++)
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+
+    while((i++ < 3))
+      ret += '=';
+
+  }
+
+  return ret;
+
 }
 
-int secret() {
-    printf("Enter the secret string: ");
-    char userInput[MAX_INPUT_LEN];
-    fgets(userInput, MAX_INPUT_LEN, stdin);  // Fixed to use fgets properly
-    
-    // Remove newline from fgets if present
-    userInput[strcspn(userInput, "\n")] = '\0';
-    
-    if (obf::hash(std::string(userInput)) == flag)
-        printf("Correct!\n");
-    else
-        printf("Incorrect!\n");
+std::string hash(std::string inp, std::string *oup, std::string key){
+  for (int i = 0; i < inp.length(); i++){
+    oup[i] = inp[i] ^ key[i % key.length()];
+  }
+  return *oup;
+}
 
+int start_it(int argc, std::string *base64_key, std::string *binary_key) {
+  const char *key = key;
+  int key_len = strlen(key);
+
+
+  if (key_len > argc){
+    *base64_key = base64_encode((unsigned char*)key, key_len);
+    return 1;
+  }else if (key_len == argc)
+  {
+    std::string TextToBinaryString(std::string words);
+    *binary_key = TextToBinaryString(std::string(key));
+    return 1;
+  }else{
     return 0;
+  }
+}
+
+std::string TextToBinaryString(std::string words) {
+    std::string binaryString = "";
+    for (char& _char : words) {
+        binaryString += std::bitset<8>(_char).to_string();
+    }
+    return binaryString;
+}
+
+std::string A() {
+    std::string a = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwE";
+    
+    if (!a.empty()) {
+        a.pop_back();
+    }
+    return a;
+}
+
+std::string AA(){
+    std::string aa = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwA";
+    if (!aa.empty()) {
+        aa.pop_back();
+    }
+    return aa;
+}
+
+std::string AAA(){
+    std::string aaa = "MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAS";
+    if (!aaa.empty()) {
+        aaa.pop_back();
+    }
+    return aaa;
+}
+
+std::string AAAA(){
+    std::string aaaa = "wMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDEwMDAwMTEwMTAxMDEwMDAxMDAwMTEwMDExMTEwMTEwMTAxMDEwMDAxMTAxMTExMDEwMTExMTEwMTEwMDAxMDAxMTAwMTAxMDEwMTExMTEwMTAwMTAwMDAxMDAxMTExMDExMDExMTAwMTEwMDEwMTAwMTAwMTAwMDExMTAxMDAwMDEwMTEwMDAwMTAxMTAxMDEwMDEwMDEwMDEwMTEwMTAxMTAwMTAwMDExMDExMTEwMTAwMTExMDAwMTAwMTExMDExMTAxMDAwMDEwMTEwMTAxMTEwMTAxMDExMDExMTAwMTEwMDEwMDAxMTAwMTAxMDExMTAwMTAwMTExMDAxMTAxMTEwMTAwMDExMDAwMDEwMTEwMTExMDAxMTAwMTAwMDEwMTExMTEwMTAxMDExMTAxMTAxMDAwMDExMDAwMDEwMTExMDEwMDAwMTAxMTAxMDEwMDEwMDEwMDEwMTEwMTAxMTAwMTAwMDExMDEwMDE=";
+    return aaaa;
+}
+
+std::string B(){
+  std::string b = "MDEwMTAxMDAwMTAwMTAwMDAxMDAwMTAxMDAxMDAwMDAwMTAxMDAxMDAxMDAwMDAxMDEwMDAw";
+  if (!b.empty()) {
+    b.pop_back();
+  }
+  return b;
+}
+std::string BB(){
+  std::string bb = "MTAwMTAwMDAxMDAxMDAxMDAxMDEwMTAxMDAwMDEwMDAwMDAxMDAxMDAwMDEwMDExMTEwMTAw";
+  if (!bb.empty()) {
+    bb.pop_back();
+  }
+  return bb;
+}
+std::string BBB(){
+  std::string bbb = "MTEwMDAxMDAwMTAxMDAxMDAwMDAwMTAwMTExMDAxMDAwMTAxMDEwMTAxMTAwMTAwMDEwMTAx";
+  if (!bbb.empty()) {
+    bbb.pop_back();
+  }
+  return bbb;
+}
+
+std::string BBBB(){
+  std::string bbbb = "MDEwMDEwMDAxMDAwMDAwMTAwMDEwMTAxMDAxMTEwMDEwMDAxMDAwMTAxMDAxMTAwMTAwMDAx";
+  if (!bbbb.empty()) {
+    bbbb.pop_back();
+  }
+  return bbbb;
+}
+
+
+std::string GetFlag() {
+  std::string Aflag = "0x7e1891b6028b08157a28";
+  std::string Bflag = "0x8f3a9c1d74b2e5f0";
+
+  Aflag = A() + AA() + AAA() + AAAA();
+  Bflag = B() + BB() + BBB() + BBBB();
+
+  if (Aflag.length() > Bflag.length()){
+    return Aflag;
+
+  }else{
+    return Bflag;
+  }
+}
+
+bool isValidFlag(const std::string& userInput, std::string &hash) {
+  std::string userInputFlag = TextToBinaryString(userInput);
+  std::bitset<BIT_SIZE> bits(userInputFlag);
+  std::bitset<BIT_SIZE> shifted = bits >> 0x40;
+  std::string shiftedString = shifted.to_string();
+  std::string base64userInputFlag = base64_encode(reinterpret_cast<const unsigned char*>(shiftedString.c_str()), shiftedString.length());
+  if (base64userInputFlag == GetFlag()) {
+      return true;
+  }else if (hash == GetFlag())
+  {
+    return true;
+  }
+  
+  return false;
+}
+
+int actualValidator(std::string input) {
+    if (input.empty()) {
+        return 0;
+    }
+    std::string binaryInput = TextToBinaryString(input);
+    std::string base64Input = base64_encode(reinterpret_cast<const unsigned char*>(binaryInput.c_str()), binaryInput.length());
+
+    for (int i = 0; i < binaryInput.length(); i++) {
+        if (binaryInput[i] != '0' && binaryInput[i] != '1') {
+            return 0;
+        }
+    }
+    
+    for (int i = 0; i < base64Input.length(); i++) {
+        if (is_base64(base64Input[i])) {
+            return 0;
+        }
+    }
+
+    if (binaryInput.length() != BIT_SIZE || base64Input != GetFlag()) {
+        return 0;
+    }
+    if (binaryInput != binaryInput) {
+        return 0;
+    }
+    return 1;
+}
+
+int decoyValidator() {
+    return 0x10;
+}
+
+int _encode(){
+  return 0x80;
+}
+
+volatile char set_11812(){
+  return very_important_string_that_never_used_yeah_I_know_that_is_not_best_variable_name[rand() % 100];
+}
+
+char set_991111141(){
+  return corrupted[rand() % 100];
 }
 
 int main() {
-    char buffer[10];
-    anti_debug_check();
+  srand(time(NULL) % 100);
+  std::string userInput;
+  char v12 = set_11812();
+  char v13 = set_991111141();
+  char v24 = v12 ^ v13;
+  std::string s_key;
+
+
+  if (IsDebuggerPresent()) {
+      std::cout << "Debugger detected. Exiting..." << std::endl;
+      return 1;
+  }
+
+  std::cout << "===== CTF Level 8 Challenge =====" << std::endl;
+  std::cout << "This challenge requires deeper analysis.\n" << std::endl;
+  std::cout << "Enter the flag to proceed:\n> ";
+  std::getline(std::cin, userInput);
+
+  if (userInput.empty()) {
+      std::cout << "Invalid input. Please try again." << std::endl;
+      return 1;
+  }
+  
+
+  clock_t start = clock();
+  int selector = rand() % 4;
+  if (selector == 0 || selector == 2 || selector == 3) {
+      int validate = actualValidator(userInput);
+  } else {
+      int validate = decoyValidator();
+  }
+  
+  clock_t end = clock();
     
-    printf("Enter a string: ");
-    fgets(buffer, sizeof(buffer), stdin);  // Fixed buffer size
-    printf("You entered: %s", buffer);  // Removed extra \n since fgets includes it
-    return 0;
+  // If too much time has elapsed, it might be a debugger
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+  if (time_spent > 0.1) {
+      printf("Processing error. Please try again.\n");
+      return 1;
+  }
+  if (start_it == 0){
+    _encode();
+  }else{
+    hash(base64_key, &s_key, key);
+  }
+
+  if (isValidFlag(userInput, s_key)) {
+      std::cout << "Correct!" << std::endl;
+  } else {
+      std::cout << "Wrong!" << std::endl;
+  }
+
+  return 0;
+
 }

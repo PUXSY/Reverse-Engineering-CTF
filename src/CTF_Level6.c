@@ -1,16 +1,26 @@
+/*
+CTF_Level6 
+ This program checks a flag by hashing your input and comparing it to a fixed number `4910934987744585413` Corect flag hash.
+ The hash function used is djb2: start with 0x5381 and for each character do: hash = hash * 33 + char.
+ To change the correct flag, run the program, enter your new flag, copy the printed hash,
+ and replace the value inside actualValidator() with that hash.
+ To solve the challenge, find a string whose djb2 hash equals the hardcoded value.
+ All random logic, timing checks, and extra validators are decoys and can be ignored.
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
-const unsigned long long correct_hash = 12763515080480605377;
+const unsigned long long Correct_hash = 12763515080480605377;
 
 
 unsigned long long hash(char *str) {
-    unsigned long long hash = 5381;
+    unsigned long long hash = 0x5381;
     int c;
     
     while ((c = *str++))
+        //  =  ((0x5381 << 5) + 0x5381) + c
         hash = ((hash << 5) + hash) + c;
     
     return hash;
@@ -20,7 +30,7 @@ unsigned long long hash(char *str) {
 typedef int (*validator_func)(char*);
 
 int actualValidator(char *input) {
-    const unsigned long long correct_hash = 9952839920628065481;
+    const unsigned long long correct_hash = 16377509176557920611;
     return hash(input) == correct_hash;
 }
 
@@ -50,7 +60,7 @@ int main() {
     clock_t start = clock();
    
 
-    int selector = rand() % 4;
+    int selector = (int[]){0, 2, 3}[rand() % 3];
     if (selector == 0 || selector == 2 || selector == 3) {
         validate = actualValidator;
     } else {

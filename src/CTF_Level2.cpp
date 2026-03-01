@@ -39,7 +39,7 @@ int main(int argc, const char** argv) {
     std::cin >> input;
 
     strcpy_s(transformed_input, sizeof(transformed_input), input);
-    strcpy_s(expected_key, sizeof(expected_key), "CTF_2_{779841834}");
+    strcpy_s(expected_key, sizeof(expected_key), "CTF{It'S_st!ll_eA$y?}");
 
     bool is_valid = strcmp(transformed_input, expected_key) == 0;
 

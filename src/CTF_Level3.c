@@ -2,7 +2,7 @@
 #include <string.h>
 
 int CheckFlag(char *UserInput) {
-    char flag[21] = "CTF_3_{296815815}";
+    char flag[43] = "CTF{YOu_UnderstAnd_h0W_thIs_wOrks,_riGht?}";
     if (strcmp(UserInput, flag) == 0) {
         return 1; // Correct
     } else {
@@ -11,7 +11,7 @@ int CheckFlag(char *UserInput) {
 }
 
 int main() {
-  char UserInput[22];
+  char UserInput[64];
 
   printf("===== CTF Level 3 Challenge =====\n");
   printf("Enter the flag:\n");

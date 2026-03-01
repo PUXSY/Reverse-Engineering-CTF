@@ -26,13 +26,20 @@ def file_changed_since_last_commit(file_path: str | Path) -> bool:
 FILE_TYPES: list[ str, list[str | object] ] = [
     ('.c', ["gcc", "-s", "{file_path}", "-o", "{output_file}"]),
     ('.cpp', ["g++", "-s", "{file_path}", "-o", "{output_file}"]),
-    ('.rs', ["rustc", "{file_path}", "--out-dir", "{current_path}"]),
 ]
 
 # Custom compile commands for specific files
 CUSTOM_COMMANDS: list[ str, str, list[str | object] ] = [
-    # Format: (filename, extension, [command])
-    ( "CTF_Level10.cpp", ".cpp", [ "g++", "-std=c++11", "-mwindows", "-g", "-o", "{output_file}", "{file_path}", "-IC:/vcpkg/installed/x64-mingw-static/include", "-LC:/vcpkg/installed/x64-mingw-static/lib", "-lglew32", "-lglfw3", "-lopengl32", "-lgdi32" ] )
+    (
+        "CTF_Level11.cpp", ".cpp",
+        [
+            "g++", "-std=c++11", "-mwindows", "-g",
+            "-o", "{output_file}", "{file_path}",
+            "-IC:/vcpkg/installed/x64-mingw-static/include",
+            "-LC:/vcpkg/installed/x64-mingw-static/lib",
+            "-lglew32", "-lglfw3", "-lopengl32", "-lgdi32"
+        ]
+    )
 ]
 
 def get_files(path: str = "./") -> list[str]:
@@ -64,31 +71,13 @@ def compile_file(file_path: Path) -> bool:
     if not command_template:
         return False
     
-    # Build command with proper substitutions
-    if file_path.suffix.lower() == '.rs' and 'rustc' in command_template[0]:
-        # Rust compilation
-        if "{output_file}" in ' '.join(command_template):
-            # Custom rust command with output file
-            output_file = file_path.with_suffix('.exe')
-            command = [arg.format(
-                file_path=str(file_path),
-                output_file=str(output_file),
-                current_path=str(CURRENT_PATH)
-            ) for arg in command_template]
-        else:
-            # Standard rust command
-            command = [arg.format(
-                file_path=str(file_path),
-                current_path=str(CURRENT_PATH)
-            ) for arg in command_template]
-    else:
-        # C/C++ compilation
-        output_file = file_path.with_suffix('.exe')
-        command = [arg.format(
-            file_path=str(file_path),
-            output_file=str(output_file),
-            current_path=str(CURRENT_PATH)
-        ) for arg in command_template]
+    # C/C++ compilation
+    output_file = file_path.with_suffix('.exe')
+    command = [arg.format(
+        file_path=str(file_path),
+        output_file=str(output_file),
+        current_path=str(CURRENT_PATH)
+    ) for arg in command_template]
     
     print(f"Compiling {file_path.name}...")
     print(f"Command: {' '.join(command)}")

@@ -1,3 +1,13 @@
+/*
+CTF_Level4
+ builds the correct flag dynamically, then checks your input against it.
+ - Flag() allocates memory and starts the flag with "CTF_".
+ - FlagP() appends "4_", and Flag2P() appends the final part "{84536134584571335}".
+ - getFlag() chains those functions to construct the full flag.
+ - CheckFlag() compares what you typed to the generated flag using strcmp.
+ - main() reads your input, trims the newline, and prints Correct! if it matches, otherwise Wrong!.
+
+*/ 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,18 +34,18 @@ char* getFlag() {
 char* Flag() {
     char *s = malloc(64);
     if (s != NULL) {
-        strcpy(s, "CTF_");
+        strcpy(s, "CT");
     }
     return s;
 }
 
 char* FlagP(char *flag) {
-    strcat(flag, "4_");
+    strcat(flag, "F{This_iS-gett");
     return flag;
 }
 
 char* Flag2P(char *flag) {
-    strcat(flag, "{84536134584571335}");
+    strcat(flag, "Ing-difficu|t.}");
     return flag;
 }
 
