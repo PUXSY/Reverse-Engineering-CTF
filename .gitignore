@@ -1,6 +1,7 @@
 flags.txt
 ctf_icon_bmp.ico
 flags.json
+.vscode
 Compile_GUI.py
 .gitattributes
 .gitignore
