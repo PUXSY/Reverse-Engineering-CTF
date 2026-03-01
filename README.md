@@ -14,20 +14,24 @@ Audience: Students, hobbyists, and entry-level reverse engineers.
 
 
 ## 📋 Levels Overview
-| Level | Difficulty | Description                                |
-|:-----:|:----------:|--------------------------------------------|
-| 1     | 🌱 Easy    | Introductory puzzle — crack the basics.    |
-| 2     | 🌱 Easy    | Simple string obfuscation.                 |
-| 3     | 🌱 Easy    | Basic control-flow twist.                  |
-| 4     | 🌱 Easy    | Intro to stack analysis.                   |
-| 5     | 🔧 Medium  | Pointer arithmetic challenge.              |
-| 6     | 🔧 Medium  | Function hooking & import resolution.      |
-| 7     | 🔧 Medium  | Simple anti-debug trick.                   |
-| 8     | 🚀 Hard    | Complex loop unrolling & math puzzle.      |
-| 9     | 🚀 Hard    | Finale — multi-layer obfuscation showdown. |
-| 10    | 🌱 Easy    | New GUI chaleng                            |
-
-
+```
+├──[-] Easy
+│   ├── Level 1 (31)
+│   ├── Level 2 (37)
+│   ├── Level 3 (51)
+│   ├── Level 4 (71)
+│   └── Level 5 (105)
+│
+├──[-] Medium
+│   ├── Level 6 (112)
+│   ├── Level 7 (100)
+│   ├── Level 10 (386)
+│   └── Level 11 (239)
+│
+└──[-] Hard
+    ├── Level 8 (351)
+    └── Level 9 (200)
+```
 
 ## Getting started
 
