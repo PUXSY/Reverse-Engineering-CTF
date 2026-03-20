@@ -11,8 +11,17 @@ CTF_Level5
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <debugapi.h>
 
-const char *binaryFlag = "01000011 01010100 01000110 01111011 01000001 01010011 01000011 01001001 01001001 00101101 01101101 01001111 01110010 01100101 00101101 01101100 01101001 01101011 01100101 01011111 01000010 01001001 01001110 01000001 01010011 01000011 01001001 01001001 00100001 00100001 00100001 01111101";
+char *binaryFlag = "01000011 01010100 01000110 01111011 01000001 01010011 01000011 01001001 01001001 00101101 01101101 01001111 01110010 01100101 00101101 01101100 01101001 01101011 01100101 01011111 01000010 01001001 01001110 01000001 01010011 01000011 01001001 01001001 00100001 00100001 00100001 01111101";
+
+
+void Debuger() {
+    if (IsDebuggerPresent()) {
+      printf("Debugger detected. Exiting...");
+      exit(1);
+    }
+}
 
 void decimalToBinary(int decimal, char *binary) {
     for (int i = 0; i < 8; i++) {
@@ -50,7 +59,8 @@ void textToBinary(char *text, char *binary) {
 }
 
 int validateFlag(char *userInput) {
-    int binaryLength = (strlen(userInput) * 9); 
+    Debuger();
+    size_t binaryLength = (strlen(userInput) * 9); 
     char *userInputBinary = malloc(binaryLength + 1);
     
     if(userInputBinary == NULL)
@@ -78,11 +88,13 @@ int validateFlag(char *userInput) {
         i++;
         j++;
     }
+    Debuger();
     free(userInputBinary);
     return xorResult;
 }
 
 int main() {
+    Debuger();
     char userInput[64];
     
     printf("===== CTF Level 5 Challenge =====\n");
@@ -90,11 +102,16 @@ int main() {
     
     fgets(userInput, sizeof(userInput), stdin);
     
+    Debuger();
+    if (sizeof(userInput) > 64 || sizeof(userInput) == 0){
+        printf("Error: Input overflow or empty input.\n");
+    }
+
     size_t len = strlen(userInput);
     if (len > 0 && userInput[len - 1] == '\n') {
         userInput[len - 1] = '\0';
     }
-
+    Debuger();
     if (validateFlag(userInput) == 0) {
         printf("\nCongratulations! You found the correct flag!\n");
     } else {

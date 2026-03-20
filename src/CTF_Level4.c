@@ -11,6 +11,7 @@ CTF_Level4
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <debugapi.h>
 
 char* Flag();
 char* FlagP(char *flag);
@@ -49,7 +50,16 @@ char* Flag2P(char *flag) {
     return flag;
 }
 
+void DebuggerPresent(){
+    if (IsDebuggerPresent()) {
+        printf("Debugger Present... bye!");
+        exit(1);
+    }
+}
+
 int main() {
+    DebuggerPresent();
+
     char UserInput[64];
 
     printf("===== CTF Level 4 Challenge =====\n");
@@ -60,6 +70,8 @@ int main() {
     if (len > 0 && UserInput[len - 1] == '\n') {
         UserInput[len - 1] = '\0';
     }
+
+    DebuggerPresent();
 
     if (CheckFlag(UserInput)) {
         printf("Correct!\n");

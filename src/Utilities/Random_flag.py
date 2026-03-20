@@ -48,7 +48,7 @@ class Create_Flag:
         for i, char in enumerate(chars):
             lower = char.lower()
             if lower in LookupTable:
-                choice = self.rm.choices([1, 2, 3], weights=[0.10, 0.10, 0.80], k=1)[0]
+                choice = self.rm.choices([1, 2, 3], weights=[0.25, 0.25, 0.50], k=1)[0]
                 if choice == 1:
                     chars[i] = self.rm.choice(LookupTable[lower])
                 elif choice == 2:
@@ -190,9 +190,6 @@ def main() -> None:
             break
 
 if __name__ == "__main__": 
-    flags = Get_Flags_list("./flags.json")
-    c = 0
-    for flag in flags:
-        c += flag.get("points")
-        
-    print("Total points:", c)
+    fg = Create_Flag(["Success you did it"])
+    flags = fg.Create_Flags()
+    print(flags[0])
