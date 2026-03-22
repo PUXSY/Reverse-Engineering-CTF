@@ -1,7 +1,19 @@
 #include <iostream>
 #include <string>
 
-void hash(std::string *input) {
+std::string rot13(std::string input) {
+    // Simple rotation cipher implementation
+    for (char& c : input) {
+        if (c >= 'a' && c <= 'z') {
+            c = 'a' + ((c - 'a' + 13) % 26);
+        } else if (c >= 'A' && c <= 'Z') {
+            c = 'A' + ((c - 'A' + 13) % 26);
+        }
+    }
+    return input;
+}
+
+void hash(std::string *input, std::string *key) {
 
 
     
@@ -40,8 +52,8 @@ int main(int argc, char** argv) {
         input.pop_back();
     }
 
+    hash(&input, &generateKey(input));
 
-    hash(&input);
-
+    
     return 0;
 }

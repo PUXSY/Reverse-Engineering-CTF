@@ -3,5 +3,6 @@ ctf_icon_bmp.ico
 flags.json
 .vscode
 Compile_GUI.py
+Random_flag.py
 .gitattributes
 .gitignore
